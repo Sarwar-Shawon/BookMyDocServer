@@ -25,7 +25,7 @@ app.use('/bookMyDoc/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use(
   cors({
-    origin: "http://192.168.0.146:3000",
+    origin: process.env.CLIENT_APP_URL,
     methods: ["GET", "POST", "DELETE" , "PUT"], 
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
