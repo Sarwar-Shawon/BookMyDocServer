@@ -30,6 +30,9 @@ import {
   doctorRegisterValidator,
   nurseRegisterValidator
 } from "../Validator/adminControllerValidator.js";
+import {
+  getProfile
+} from "../controllers/profileController.js";
 //authurization check
 import { auth, checkAuthRole } from "../middleware/auth.js";
 import roles from '../helpers/roles.js'
@@ -86,5 +89,8 @@ adminRouter
 adminRouter
   .route("/updadteOrganization")
   .put( auth, checkAuthRole([roles.Admin]), upload.single("img"), updadteOrganization);
+adminRouter
+  .route("/get-profile")
+  .get( auth, checkAuthRole([roles.Admin]), getProfile);
 //
 export default adminRouter;

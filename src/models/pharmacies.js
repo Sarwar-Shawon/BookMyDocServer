@@ -27,13 +27,15 @@ const pharmaciesSchema = new mongoose.Schema({
   addr:{
     type: Object,
   },
-  details: {
-    type: Object,
-  },
   active: {
     type: Boolean,
     required: true
-  }
+  },
+  org:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Organizations",
+    required: true
+  },
 });
 //
 const Pharmacies = mongoose.model("Pharmacies", pharmaciesSchema);

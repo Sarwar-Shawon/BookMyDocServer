@@ -41,11 +41,11 @@ const registerToSystem = async (obj) => {
         </p>`,
       });
     }
-    return {success: true, message: "Success."}
+    return { success: true, message: "Success." };
   } catch (err) {
     //return err
     if (err.code == 11000) {
-      return {success: false, error: "This email is already exists."}
+      return { success: false, error: "This email is already exists." };
     } else {
       throw err;
     }
@@ -80,8 +80,8 @@ const registerNewDoctror = async (req, res) => {
     const saveData = await doctor.save();
     //
     await Doctors.populate(updData, [
-      { path: "dept", select: { '_id': 1, 'name': 1 } },
-      { path: "organization", select: { '_id': 1, 'name': 1, 'addr': 1 } }
+      { path: "dept", select: { _id: 1, name: 1 } },
+      { path: "organization", select: { _id: 1, name: 1, addr: 1 } },
     ]);
     //
     const saveUser = await registerToSystem({
@@ -89,15 +89,15 @@ const registerNewDoctror = async (req, res) => {
       user_type: roles.Doctor,
     });
     //return response
-    if(saveUser.success){
+    if (saveUser.success) {
       res.status(200).json({
         success: true,
         message: "You've successfully added a new doctor.",
         data: saveData,
       });
-    }else{
-      await Doctors.findOneAndDelete({doc_email: req.body.doc_email});
-      throw {message : saveUser.error}
+    } else {
+      await Doctors.findOneAndDelete({ doc_email: req.body.doc_email });
+      throw { message: saveUser.error };
     }
   } catch (err) {
     console.log("registerNewDoctror::: err", err);
@@ -144,15 +144,14 @@ const updadteDoctor = async (req, res) => {
     const updData = await doctor.save();
     //return response
     await Doctors.populate(updData, [
-      { path: "dept", select: { '_id': 1, 'name': 1 } },
-      { path: "organization", select: { '_id': 1, 'name': 1, 'addr': 1 } }
+      { path: "dept", select: { _id: 1, name: 1 } },
+      { path: "organization", select: { _id: 1, name: 1, addr: 1 } },
     ]);
     //
     res.status(200).json({
       success: true,
       message: "You've successfully updated your information.",
       data: updData,
-
     });
   } catch (err) {
     //return err
@@ -168,9 +167,9 @@ const getAllDoctors = async (req, res) => {
         : 0;
     const limit = 10;
     const doctors = await Doctors.find({})
-    .populate("dept", { '_id': 1, 'name': 1 }) 
-    .populate("organization", { '_id': 1, 'name': 1, 'addr': 1 }) 
-    .limit(limit);
+      .populate("dept", { _id: 1, name: 1 })
+      .populate("organization", { _id: 1, name: 1, addr: 1 })
+      .limit(limit);
     //
     res.status(200).json({
       success: true,
@@ -205,7 +204,6 @@ const registerNewNurse = async (req, res) => {
       dept: req.body.dept,
       organization: req.body.organization,
       img: imgUrl,
-      
     });
     //save to db
     const saveData = await nurse.save();
@@ -213,8 +211,8 @@ const registerNewNurse = async (req, res) => {
     // await saveData.populate("dept", { '_id': 1, 'name': 1 });
 
     await Nurses.populate(updData, [
-      { path: "dept", select: { '_id': 1, 'name': 1 } },
-      { path: "organization", select: { '_id': 1, 'name': 1, 'addr': 1 } }
+      { path: "dept", select: { _id: 1, name: 1 } },
+      { path: "organization", select: { _id: 1, name: 1, addr: 1 } },
     ]);
     //
     const saveUser = await registerToSystem({
@@ -222,15 +220,15 @@ const registerNewNurse = async (req, res) => {
       user_type: roles.Nurse,
     });
     //return response
-    if(saveUser.success){
+    if (saveUser.success) {
       res.status(200).json({
         success: true,
         message: "You've successfully added a new nurse.",
         data: saveData,
       });
-    }else{
-      await Nurses.findOneAndDelete({nur_email: req.body.nur_email});
-      throw {message : saveUser.error}
+    } else {
+      await Nurses.findOneAndDelete({ nur_email: req.body.nur_email });
+      throw { message: saveUser.error };
     }
   } catch (err) {
     console.log("registerNewNurse::: err", err);
@@ -271,19 +269,19 @@ const updadteNurse = async (req, res) => {
     nurse.active = req.body.active;
     nurse.organization = req.body.organization;
     nurse.img = imgUrl;
-      //save to db
+    //save to db
     const updNur = await nurse.save();
     //
     // await updNur.populate("dept", { '_id': 1, 'name': 1 });
     await Nurses.populate(updNur, [
-      { path: "dept", select: { '_id': 1, 'name': 1 } },
-      { path: "organization", select: { '_id': 1, 'name': 1, 'addr': 1 } }
+      { path: "dept", select: { _id: 1, name: 1 } },
+      { path: "organization", select: { _id: 1, name: 1, addr: 1 } },
     ]);
     //return response
     res.status(200).json({
       success: true,
       message: "You've successfully updated your information.",
-      data: updNur
+      data: updNur,
     });
   } catch (err) {
     //return err
@@ -298,11 +296,11 @@ const getAllNurses = async (req, res) => {
         ? Number(req.query.skip)
         : 0;
     const limit = 10;
-    const nurses  = await Nurses.find({})
-    .populate("dept", { '_id': 1, 'name': 1 }) 
-    .populate("organization", { '_id': 1, 'name': 1, 'addr': 1 }) 
-    .skip(skip)
-    .limit(limit);
+    const nurses = await Nurses.find({})
+      .populate("dept", { _id: 1, name: 1 })
+      .populate("organization", { _id: 1, name: 1, addr: 1 })
+      .skip(skip)
+      .limit(limit);
 
     res.status(200).json({
       success: true,
@@ -333,37 +331,42 @@ const registerNewPharmacy = async (req, res) => {
       phone: req.body.phone,
       img: imgUrl,
       addr: req.body.addr,
+      org: req.body.org,
+      active: req.body.active,
     });
-   //save to db
-   const saveData = await pharmacy.save();
-   //
-   const saveUser = await registerToSystem({
-     email: req.body.phar_email,
-     user_type: roles.Pharmacy,
-   });
-   //return response
-   if(saveUser.success){
-     res.status(200).json({
-       success: true,
-       message: "You've successfully added a new pharmacy.",
-       data: saveData,
-     });
-   }else{
-     await Pharmacies.findOneAndDelete({phar_email: req.body.phar_email});
-     throw {message : saveUser.error}
-   }
- } catch (err) {
-   console.log("registerNewPharmacy:: err", err);
-   //return err
-   if (err.code == 11000) {
-     res.status(500).json({
-       success: false,
-       error: "This email is already exists.",
-     });
-   } else {
-     return res.status(500).json({ success: false, error: err.message });
-   }
- }
+    //save to db
+    const saveData = await pharmacy.save();
+    //
+    await Pharmacies.populate(saveData, [
+      { path: "org", select: { _id: 1, name: 1 } },
+    ]);
+    const saveUser = await registerToSystem({
+      email: req.body.phar_email,
+      user_type: roles.Pharmacy,
+    });
+    //return response
+    if (saveUser.success) {
+      res.status(200).json({
+        success: true,
+        message: "You've successfully added a new pharmacy.",
+        data: saveData,
+      });
+    } else {
+      await Pharmacies.findOneAndDelete({ phar_email: req.body.phar_email });
+      throw { message: saveUser.error };
+    }
+  } catch (err) {
+    console.log("registerNewPharmacy:: err", err);
+    //return err
+    if (err.code == 11000) {
+      res.status(500).json({
+        success: false,
+        error: "This email is already exists.",
+      });
+    } else {
+      return res.status(500).json({ success: false, error: err.message });
+    }
+  }
 };
 // update pharmacy to system
 const updadtePharmacy = async (req, res) => {
@@ -387,13 +390,18 @@ const updadtePharmacy = async (req, res) => {
     pharmacy.img = req.body.img;
     pharmacy.addr = req.body.addr;
     pharmacy.active = req.body.active;
-    (pharmacy.img = imgUrl),
-      //update to db
-      await pharmacy.save();
+    pharmacy.org = req.body.org;
+    pharmacy.img = imgUrl;
+    //update to db
+    const updData = await pharmacy.save();
     //return response
+    await Pharmacies.populate(updData, [
+      { path: "org", select: { '_id': 1, 'name': 1 } }
+    ]);
     res.status(200).json({
       success: true,
       message: "You've successfully updated your information.",
+      data: updData
     });
   } catch (err) {
     //return err
@@ -408,8 +416,11 @@ const getAllPharmacies = async (req, res) => {
         ? Number(req.query.skip)
         : 0;
     const limit = 10;
-    const nurses = await Pharmacies.find({}, undefined, { skip, limit });
-    //
+    const pharmacies = await Pharmacies.find({})
+      .populate("org", { _id: 1, name: 1})
+      .skip(skip)
+      .limit(limit);
+
     res.status(200).json({
       success: true,
       data: pharmacies,
@@ -436,8 +447,6 @@ export {
   getAllPharmacies,
 };
 
-
-
 // Doctors.find({})
 //   .populate({
 //     path: "organization",
@@ -450,7 +459,7 @@ export {
 //     } else {
 //       // Filter out doctors whose organization does not match the location
 //       const filteredDoctors = doctors.filter(doctor => doctor.organization !== null);
-      
+
 //       // Do something with filteredDoctors
 //     }
 //   });
