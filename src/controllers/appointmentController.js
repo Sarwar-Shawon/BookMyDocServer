@@ -1,0 +1,250 @@
+/*
+ * @copyRight by md sarwar hoshen.
+ */
+import Doctors from "../models/doctors.js";
+import Patients from "../models/patients.js";
+import mongoose from "mongoose";
+const ObjectId = mongoose.Schema.Types.ObjectId;
+import Appointments from "../models/appointments.js";
+import mailSender from "../services/mailSender.js";
+import { getToken } from "../utils/getToken.js";
+import jwt from "jsonwebtoken";
+import moment from "moment";
+//
+const createAppointment = async (req, res) => {
+  try {
+    const token = getToken(req.headers["authorization"]);
+    const curUser = jwt.decode(token);
+    const [patient, doctor] = await Promise.all([
+      Patients.findOne({ pt_email: curUser.email }),
+      Doctors.findById(req.body.doc_id),
+    ]);
+    if (!patient && !doctor) {
+      return res.status(422).json({ success: false, error: "No data found" });
+    }
+    console.log("req.body", req.body.apt_date);
+    const params = {
+      pt: patient._id,
+      doc: doctor._id,
+      apt_date: new Date(moment(req.body.apt_date).format("YYYY-MM-DD")),
+      status: "Pending",
+      createdAt: Date.now(),
+      dept: req.body.dept,
+      org: req.body.org,
+      timeslot: req.body.timeslot,
+      uniqueId: [
+        req.body.timeslot,
+        moment(req.body.apt_date).format("DD-MM-YYYY"),
+        doctor._id,
+      ].join(""),
+    };
+    console.log("params:::", params);
+    //
+    const appointment = new Appointments(params);
+    const saveApt = await appointment.save();
+    //
+    if (saveApt._id) {
+      await mailSender({
+        to: [patient.pt_email, doctor.doc_email],
+        subject: "New Appointment",
+        body: `<p>A new appointment has created on : <strong>${moment(
+          params.apt_date
+        ).format("DD-MM-YYYY")}</strong> at: <strong>${
+          params.apt_date
+        }</strong> .</n>
+            Doctor:  <strong>${[doctor.f_name, doctor.l_name].join(
+              " "
+            )}</strong> .</n>
+            Patient:  <strong>${[patient.f_name, patient.l_name].join(
+              " "
+            )}</strong> .</n>
+            Appointment Id:  <strong>${saveApt._id}</strong></n>
+          </p>`,
+      });
+    }
+    //
+    res.status(200).json({
+      success: true,
+      data: saveApt,
+    });
+  } catch (err) {
+    //return err
+    console.log("err:", err);
+    if (err.code == "11000") {
+      return res.status(500).json({
+        success: false,
+        status: "exists",
+        error:
+          "This timeslot has already taken. Please select a new time slot.",
+      });
+    }
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+//
+const updateAppointment = async (req, res) => {
+  try {
+    //
+    const token = getToken(req.headers["authorization"]);
+    const curUser = jwt.decode(token);
+    const user =
+      curUser.roles.toLowerCase() == "patient"
+        ? await Patients.findOne({ pt_email: curUser.email })
+        : await Doctors.findOne({ doc_email: curUser.email });
+    if (!user) {
+      return res.status(422).json({ success: false, error: "No user found" });
+    }
+    const apt = await Appointments.findOne({ _id: req.body.apt_id });
+    console.log("aptapt",apt)
+    if (!apt) {
+      return res
+        .status(422)
+        .json({ success: false, error: "No appointment found" });
+    }
+    if (curUser.roles.toLowerCase() == "doctor" && req.body.status)
+      apt.status = req.body.status;
+    if (req.body.apt_date) apt.apt_date = req.body.apt_date;
+    if (req.body.timeslot) apt.apt_date = req.body.timeslot;
+    //
+    apt.save();
+    //
+    res.status(200).json({
+      success: true,
+      data: apt,
+    });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+//
+const cancelAppointment = async (req, res) => {
+  try {
+    //
+    const token = getToken(req.headers["authorization"]);
+    const curUser = jwt.decode(token);
+    const user =
+      curUser.roles.toLowerCase() == "patient"
+        ? await Patients.findOne({ pt_email: curUser.email })
+        : await Doctors.findOne({ doc_email: curUser.email });
+    if (!user) {
+      return res.status(422).json({ success: false, error: "No user found" });
+    }
+    const apt = await Appointments.findOne({ _id: req.body.apt_id });
+    if (!apt) {
+      return res
+        .status(422)
+        .json({ success: false, error: "No appointment found" });
+    }
+    //
+    apt.deleteOne();
+    //
+    res.status(200).json({
+      success: true,
+      data: apt,
+    });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+//
+const getPatientAppointments = async (req, res) => {
+  try {
+    //
+    const token = getToken(req.headers["authorization"]);
+    const curUser = jwt.decode(token);
+    const patient = await Patients.findOne({ pt_email: curUser.email });
+    if (!patient) {
+      return res.status(422).json({ success: false, error: "No user found" });
+    }
+    //
+    const startDay = req.query.startDay ? new Date(req.query.startDay) : new Date();
+    startDay.setUTCHours(0, 0, 0, 0);
+    const endDay = req.query.endDay ? new Date(req.query.endDay) : new Date();
+    endDay.setUTCHours(23, 59, 59, 999);
+    //
+    const skip =
+      req.query.skip && /^\d+$/.test(req.query.skip)
+        ? Number(req.query.skip)
+        : 0;
+    const limit = 10;
+    console.log("startDaystartDaystartDaystartDay:",startDay)
+    const appointments  = await Appointments.find({
+        pt: patient._id,
+        apt_date: {
+            $gte: startDay,
+        }
+    })
+    .populate("dept", { '_id': 1, 'name': 1 }) 
+    .populate("org", { '_id': 1, 'name': 1, 'addr': 1 }) 
+    .populate("doc", { '_id': 1, 'f_name': 1, 'l_name' : 1, 'img': 1 }) 
+    .populate("pt", { '_id': 1, 'f_name': 1, 'l_name' : 1, 'img': 1 }) 
+    .skip(skip)
+    .limit(limit);
+    console.log("appointmentsappointments:::", appointments)
+    //
+    res.status(200).json({
+      success: true,
+      data: appointments,
+    });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+//
+const getDoctorAppointments = async (req, res) => {
+  try {
+    //
+    const token = getToken(req.headers["authorization"]);
+    const curUser = jwt.decode(token);
+    const doctor = await Doctors.findOne({ doc_email: curUser.email });
+    if (!doctor) {
+      return res.status(422).json({ success: false, error: "No user found" });
+    }
+    //
+    const startDay = req.query.startDay ? new Date(req.query.startDay) : new Date();
+    startDay.setUTCHours(0, 0, 0, 0);
+    const endDay = req.query.endDay ? new Date(req.query.endDay) : new Date();
+    endDay.setUTCHours(23, 59, 59, 999);
+    //
+    const skip =
+      req.query.skip && /^\d+$/.test(req.query.skip)
+        ? Number(req.query.skip)
+        : 0;
+    const limit = 10;
+    const _type = req.query.status
+    const appointments  = await Appointments.find({
+        doc: doctor._id,
+        apt_date: {
+            $gte: startDay,
+        },
+        status: _type
+    })
+    .populate("dept", { '_id': 1, 'name': 1 }) 
+    .populate("org", { '_id': 1, 'name': 1, 'addr': 1 }) 
+    .populate("doc", { '_id': 1, 'f_name': 1, 'l_name' : 1, 'img': 1 }) 
+    .populate("pt", { '_id': 1, 'f_name': 1, 'l_name' : 1, 'img': 1 ,'nhs': 1 }) 
+    .skip(skip)
+    .limit(limit);
+    console.log("appointmentsappointments:::", appointments)
+    //
+    res.status(200).json({
+      success: true,
+      data: appointments,
+    });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+//
+export {
+  //
+  createAppointment,
+  updateAppointment,
+  getPatientAppointments,
+  getDoctorAppointments,
+  cancelAppointment,
+};
