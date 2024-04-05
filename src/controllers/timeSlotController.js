@@ -196,7 +196,7 @@ const getTimeSlotsByDate = async (req, res) => {
     //
     res.status(200).json({
       success: true,
-      data: data.timeSlots,
+      data: data?.timeSlots[day] || {}
     });
   } catch (err) {
     //return err
@@ -204,4 +204,4 @@ const getTimeSlotsByDate = async (req, res) => {
   }
 };
 //
-export { createTimeSlot, updateTimeSlot , getTimeSlots, getTimeSlotsForPatient };
+export { createTimeSlot, updateTimeSlot , getTimeSlots, getTimeSlotsForPatient, getTimeSlotsByDate };
