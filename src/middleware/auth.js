@@ -3,8 +3,8 @@
  */
 import jwt from "jsonwebtoken";
 import {getToken} from "../utils/getToken.js";
-// import roles from "../helpers/roles.js";
-
+import Nurses from "../models/nurses.js";
+import Doctors from "../models/doctors.js";
 //
 const auth = async (req, res, next) => {
   const accessToken = getToken(req.headers["authorization"]);
@@ -55,5 +55,49 @@ const checkAuthRole = (UserRoles) => async (req, res, next) => {
     });
   }
 };
+// verify doctor
+const verifyDoctor = async (req, res, next) => {
+  try {
+    const token = getToken(req.headers["authorization"]);
+    const curUser = jwt.decode(token);
+    const doctor = await Doctors.findOne({ doc_email: curUser.email });
+    if (!doctor) {
+      return res.status(422).json({ success: false, error: "No user found" });
+    }
+    req.doctor = doctor;
+    next();
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+// verify nurse to access doctor
+const verifyNurseForDoctor = async (req, res, next) => {
+  try {
+    const token = getToken(req.headers["authorization"]);
+    const curUser = jwt.decode(token);
+    const nurse = await Nurses.findOne({ nur_email: curUser.email });
+    if (!nurse) {
+      return res.status(422).json({ success: false, error: "No user found" });
+    }
+    //
+    const doctor = await Doctors.findOne({
+      $and: [
+        { _id: req.query.doc_id }, 
+        { nurses: { $in: [nurse._id] } } 
+      ]
+    }).select(
+      ["_id"]
+    );
+    if (!doctor) {
+      return res.status(422).json({ success: false, error: "No user found" });
+    }
+    req.doctor = doctor;
+    next(); 
+    //
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+
 //
-export { auth, checkAuthRole };
+export { auth, checkAuthRole, verifyDoctor, verifyNurseForDoctor };

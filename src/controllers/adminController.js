@@ -75,6 +75,7 @@ const registerNewDoctror = async (req, res) => {
       dept: req.body.dept,
       organization: req.body.organization,
       img: imgUrl,
+      nurses: req.body.nurses
     });
     //save to db
     const saveData = await doctor.save();
@@ -139,7 +140,7 @@ const updadteDoctor = async (req, res) => {
     doctor.img = imgUrl;
     doctor.dept = req.body.dept;
     doctor.organization = req.body.organization;
-
+    doctor.nurses= req.body.nurses
     //update to db
     const updData = await doctor.save();
     //return response
@@ -311,7 +312,32 @@ const getAllNurses = async (req, res) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 };
+//get all nurses
+const getAllNursesByDeptAndOrg = async (req, res) => {
+  try {
 
+    if (!req.query.dept && !req.query.org) {
+      return res
+        .status(500)
+        .json({
+          success: false,
+          error: "please select department and organization",
+        });
+    }
+    const nurses = await Nurses.find({
+      dept: req.query.dept,
+      organization: req.query.org,
+    });
+    //
+    res.status(200).json({
+      success: true,
+      data: nurses,
+    });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
 /*
  * Pharmacy.
  */
@@ -441,10 +467,12 @@ export {
   registerNewNurse,
   updadteNurse,
   getAllNurses,
+  getAllNursesByDeptAndOrg,
   //
   registerNewPharmacy,
   updadtePharmacy,
   getAllPharmacies,
+
 };
 
 // Doctors.find({})

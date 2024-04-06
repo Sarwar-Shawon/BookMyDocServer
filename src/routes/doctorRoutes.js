@@ -10,7 +10,7 @@ import {
   nurseRegisterValidator,
 } from "../Validator/adminControllerValidator.js";
 //authurization check
-import { auth, checkAuthRole } from "../middleware/auth.js";
+import { auth, checkAuthRole, verifyDoctor } from "../middleware/auth.js";
 import roles from "../helpers/roles.js";
 import { upload } from "../utils/uploadImage.js";
 //
@@ -18,7 +18,8 @@ import {
   getDoctorAppointments,
   updateAppointment,
   acceptAppointment,
-  cancelAppointment
+  cancelAppointment,
+  getAppointmentsHistory
 } from "../controllers/appointmentController.js";
 //
 const doctorRouter = express.Router();
@@ -42,7 +43,7 @@ doctorRouter
   .get(auth, checkAuthRole([roles.Doctor]), getTimeSlotsByDate);
 doctorRouter
   .route("/get-appointments")
-  .get(auth, checkAuthRole([roles.Doctor]), getDoctorAppointments);
+  .get(verifyDoctor, checkAuthRole([roles.Doctor]), getDoctorAppointments);
 doctorRouter
   .route("/accept-appointments")
   .put(auth, checkAuthRole([roles.Doctor]), acceptAppointment);
@@ -52,5 +53,8 @@ doctorRouter
 doctorRouter
   .route("/cancel-appointments")
   .put(auth, checkAuthRole([roles.Doctor]), cancelAppointment);
+doctorRouter
+  .route("/get-appointments-history")
+  .get(auth, checkAuthRole([roles.Doctor]), getAppointmentsHistory);
 //
 export default doctorRouter;

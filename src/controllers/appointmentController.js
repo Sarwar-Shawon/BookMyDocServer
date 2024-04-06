@@ -3,6 +3,7 @@
  */
 import Doctors from "../models/doctors.js";
 import Patients from "../models/patients.js";
+import Nurses from "../models/nurses.js";
 import mongoose from "mongoose";
 const ObjectId = mongoose.Schema.Types.ObjectId;
 import Appointments from "../models/appointments.js";
@@ -315,12 +316,7 @@ const getPatientAppointments = async (req, res) => {
 const getDoctorAppointments = async (req, res) => {
   try {
     //
-    const token = getToken(req.headers["authorization"]);
-    const curUser = jwt.decode(token);
-    const doctor = await Doctors.findOne({ doc_email: curUser.email });
-    if (!doctor) {
-      return res.status(422).json({ success: false, error: "No user found" });
-    }
+    const doctor = req.doctor;
     //
     const startDay = req.query.startDay
       ? new Date(req.query.startDay)
@@ -360,6 +356,108 @@ const getDoctorAppointments = async (req, res) => {
   }
 };
 //
+const getAppointmentsHistory = async (req, res) => {
+  try {
+    //
+    const token = getToken(req.headers["authorization"]);
+    const curUser = jwt.decode(token);
+    const user =
+      curUser.roles.toLowerCase() == "patient"
+        ? await Patients.findOne({ pt_email: curUser.email })
+        : await Doctors.findOne({ doc_email: curUser.email });
+    if (!user) {
+      return res.status(422).json({ success: false, error: "No user found" });
+    }
+    //
+    const startDay = req.query.startDay
+      ? new Date(req.query.startDay)
+      : new Date();
+    startDay.setUTCHours(0, 0, 0, 0);
+    const endDay = req.query.endDay ? new Date(req.query.endDay) : new Date();
+    endDay.setUTCHours(23, 59, 59, 999);
+    //
+    const skip =
+      req.query.skip && /^\d+$/.test(req.query.skip)
+        ? Number(req.query.skip)
+        : 0;
+    const limit = 10;
+    //
+    const params = {
+      doc: user._id,
+      apt_date: {
+        $gte: startDay,
+        $lte: endDay
+      }
+    }
+    if(curUser.roles.toLowerCase() == "patient")
+      params.pt = user._id
+    if(curUser.roles.toLowerCase() == "doctor")
+      params.doc = user._id
+    if(req.query.status)
+      params.status = req.query.status
+
+    const appointments = await Appointments.find(params).populate("dept", { _id: 1, name: 1 })
+      .populate("org")
+      .populate("doc")
+      .populate("pt")
+      .skip(skip)
+      .limit(limit);
+    //
+    res.status(200).json({
+      success: true,
+      data: appointments,
+    });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+//
+const getAppointmentsForNurse = async (req, res) => {
+  try {
+    //
+    const doctor = req.doctor;
+    //
+    const startDay = req.query.startDay
+      ? new Date(req.query.startDay)
+      : new Date();
+    startDay.setUTCHours(0, 0, 0, 0);
+    const endDay = req.query.endDay ? new Date(req.query.endDay) : new Date();
+    endDay.setUTCHours(23, 59, 59, 999);
+    //
+    const skip =
+      req.query.skip && /^\d+$/.test(req.query.skip)
+        ? Number(req.query.skip)
+        : 0;
+    const limit = 10;
+    const _type = req.query.status;
+    //
+    const appointments = await Appointments.find({
+      doc: doctor._id,
+      apt_date: {
+        $gte: startDay,
+      },
+      status: _type,
+    })
+      .populate("dept", { _id: 1, name: 1 })
+      .populate("org", { _id: 1, name: 1, addr: 1 })
+      .populate("doc", { _id: 1, f_name: 1, l_name: 1, img: 1 })
+      .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1, nhs: 1 })
+      .skip(skip)
+      .limit(limit);
+    console.log("appointmentsappointments:::", appointments);
+    //
+    res.status(200).json({
+      success: true,
+      data: appointments,
+    });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+//
+
 export {
   //
   createAppointment,
@@ -368,4 +466,6 @@ export {
   acceptAppointment,
   updateAppointment,
   cancelAppointment,
+  getAppointmentsHistory,
+  getAppointmentsForNurse
 };

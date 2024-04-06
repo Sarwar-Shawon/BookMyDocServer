@@ -10,6 +10,7 @@ import {
   registerNewNurse,
   updadteNurse,
   getAllNurses,
+  getAllNursesByDeptAndOrg,
   //
   registerNewPharmacy,
   updadtePharmacy,
@@ -59,6 +60,9 @@ adminRouter
 adminRouter
   .route("/getAllNurses")
   .get( auth, checkAuthRole([roles.Admin]) , getAllNurses);
+adminRouter
+  .route("/getAllNursesByDeptOrg")
+  .get( auth, checkAuthRole([roles.Admin]) , getAllNursesByDeptAndOrg);
 //
 adminRouter
   .route("/registerPharmacy")
