@@ -6,7 +6,8 @@ import Patients from "../models/patients.js";
 import TimeSlots from "../models/TimeSlots.js";
 import Appointments from "../models/appointments.js";
 import jwt from "jsonwebtoken";
-import {getToken} from "../utils/getToken.js";
+import { getToken } from "../utils/getToken.js";
+import moment from "moment";
 
 //
 const dayMapping = {
@@ -16,7 +17,7 @@ const dayMapping = {
   3: "wednesday",
   4: "thursday",
   5: "friday",
-  6: "saturday"
+  6: "saturday",
 };
 //create
 const createTimeSlot = async (req, res) => {
@@ -33,10 +34,9 @@ const createTimeSlot = async (req, res) => {
       timeSlots: req.body.timeSlots,
       doctor: doctor._id,
       messege: "You've successfully created timeslots.",
-
     });
     //
-    await timeSlots.save()
+    await timeSlots.save();
 
     res.status(200).json({
       success: true,
@@ -62,9 +62,9 @@ const updateTimeSlot = async (req, res) => {
       doctor: doctor._id,
     });
     //
-    doctorSlots.timeSlots = req.body.timeSlots
+    doctorSlots.timeSlots = req.body.timeSlots;
     //
-    await doctorSlots.save()
+    await doctorSlots.save();
     //
     res.status(200).json({
       success: true,
@@ -75,7 +75,7 @@ const updateTimeSlot = async (req, res) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 };
-//get
+//get doctor time slots
 const getTimeSlots = async (req, res) => {
   try {
     //
@@ -85,7 +85,7 @@ const getTimeSlots = async (req, res) => {
     if (!doctor) {
       return res.status(422).json({ success: false, error: "No doctor found" });
     }
-    console.log("req.query.date::", req.query.date)
+    console.log("req.query.date::", req.query.date);
     const date = new Date(req.query.date);
     //
     const data = await TimeSlots.findOne({ doctor: doctor._id });
@@ -99,7 +99,7 @@ const getTimeSlots = async (req, res) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 };
-//get
+//get time slots for patient
 const getTimeSlotsForPatient = async (req, res) => {
   try {
     //
@@ -112,48 +112,64 @@ const getTimeSlotsForPatient = async (req, res) => {
     if (!patient && !doctor) {
       return res.status(422).json({ success: false, error: "No data found" });
     }
+    //
     const date = new Date(req.query.date);
     const startOfDay = new Date(req.query.startDay || date);
     startOfDay.setUTCHours(0, 0, 0, 0);
     const endOfDay = new Date(req.query.endDay || date);
     endOfDay.setUTCHours(23, 59, 59, 999);
-    const day = dayMapping[startOfDay.getDay()]
-    console.log("startOfDay",startOfDay)
-    console.log("endOfDay",endOfDay)
-    console.log("day",day)
-    const timeSlotsAvailabilityData = await Appointments.find({ 
-        doc: doctor._id,
-        apt_date: {
-            $gte: startOfDay, 
-            $lte: endOfDay     
-        }
+    //
+    const day = dayMapping[startOfDay.getDay()];
+    const timeSlotsAvailabilityData = await Appointments.find({
+      doc: doctor._id,
+      apt_date: {
+        $gte: startOfDay,
+        $lte: endOfDay,
+      },
     });
     //
     console.log("timeSlotsAvailabilityData", timeSlotsAvailabilityData);
     //
     const data = await TimeSlots.findOne({ doctor: doctor._id });
-    
-    console.log('data:::',data)
-    if(timeSlotsAvailabilityData.length){
-      timeSlotsAvailabilityData.map((item)=>{
-          if(data.timeSlots[day] && data.timeSlots[day][item.timeslot]){
-                console.log("data.timeSlots[day][item.timeslot]", data.timeSlots[day][item.timeslot])
-                data.timeSlots[day][item.timeslot].active = false;
-                data.timeSlots[day][item.timeslot].aptId = "1223";
-          }
-      })
+    console.log("data:::", data);
+
+    if (timeSlotsAvailabilityData.length) {
+      timeSlotsAvailabilityData.map((item) => {
+        if (data.timeSlots[day] && data.timeSlots[day][item.timeslot]) {
+          data.timeSlots[day][item.timeslot].active = false;
+        }
+      });
+    }
+    //
+    let timeSlotsData = data?.timeSlots[day];
+    //
+    const currentTime = new Date();
+    const date1 = moment(new Date(req.query.date.replace(/GMT.*$/, ''))).format('DD/MM/YYYY');
+    const date2 = moment(new Date()).format('DD/MM/YYYY');
+    if (date1 === date2) {
+      const futureTimeSlots = {};
+      Object.keys(timeSlotsData).forEach((key) => {
+        const slot = timeSlotsData[key];
+        const [hours, minutes] = slot.startTime.split(":");
+        const slotTime = new Date();
+        slotTime.setHours(hours, minutes, 0);
+        if (slotTime > currentTime) {
+          futureTimeSlots[key] = slot;
+        }
+      });
+      timeSlotsData = futureTimeSlots;
     }
     //
     res.status(200).json({
       success: true,
-      data: data?.timeSlots[day] || {},
+      data: timeSlotsData || {},
     });
   } catch (err) {
     //return err
     return res.status(500).json({ success: false, error: err.message });
   }
 };
-//get
+//get time slots for doctors
 const getTimeSlotsByDate = async (req, res) => {
   try {
     //
@@ -163,40 +179,62 @@ const getTimeSlotsByDate = async (req, res) => {
     if (!doctor) {
       return res.status(422).json({ success: false, error: "No doctor found" });
     }
-    console.log("req.query.date::", req.query.date)
+    console.log("req.query.date::", req.query.date);
     const date = new Date(req.query.date);
-    console.log("req.query.date::", date)
+    console.log("req.query.date::", date);
 
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
-    const day = dayMapping[startOfDay.getDay()]
+    const day = dayMapping[startOfDay.getDay()];
 
-    const timeSlotsAvailabilityData = await Appointments.find({ 
+    const timeSlotsAvailabilityData = await Appointments.find({
       doc: doctor._id,
       apt_date: {
-          $gte: startOfDay,
-          $lte: endOfDay
-      }
-  });
+        $gte: startOfDay,
+        $lte: endOfDay,
+      },
+    });
     //
     console.log("timeSlotsAvailabilityData", timeSlotsAvailabilityData);
     //
     const data = await TimeSlots.findOne({ doctor: doctor._id });
-    if(timeSlotsAvailabilityData){
-      timeSlotsAvailabilityData.map((item)=>{
-          if(data.timeSlots[day] && data.timeSlots[day][item.timeslot]){
-                console.log("data.timeSlots[day][item.timeslot]", data.timeSlots[day][item.timeslot])
-                data.timeSlots[day][item.timeslot].active = false;
-                data.timeSlots[day][item.timeslot].aptId = item._id;
-          }
-      })
+    if (timeSlotsAvailabilityData) {
+      timeSlotsAvailabilityData.map((item) => {
+        if (data.timeSlots[day] && data.timeSlots[day][item.timeslot]) {
+          console.log(
+            "data.timeSlots[day][item.timeslot]",
+            data.timeSlots[day][item.timeslot]
+          );
+          data.timeSlots[day][item.timeslot].active = false;
+          data.timeSlots[day][item.timeslot].aptId = item._id;
+        }
+      });
+    }
+
+    let timeSlotsData = data?.timeSlots[day];
+    //
+    const currentTime = new Date();
+    const date1 = moment(new Date(req.query.date.replace(/GMT.*$/, ''))).format('DD/MM/YYYY');
+    const date2 = moment(new Date()).format('DD/MM/YYYY');
+    if (date1 === date2) {
+      const futureTimeSlots = {};
+      Object.keys(timeSlotsData).forEach((key) => {
+        const slot = timeSlotsData[key];
+        const [hours, minutes] = slot.startTime.split(":");
+        const slotTime = new Date();
+        slotTime.setHours(hours, minutes, 0);
+        if (slotTime > currentTime) {
+          futureTimeSlots[key] = slot;
+        }
+      });
+      timeSlotsData = futureTimeSlots;
     }
     //
     res.status(200).json({
       success: true,
-      data: data?.timeSlots[day] || {}
+      data: timeSlotsData || {},
     });
   } catch (err) {
     //return err
@@ -204,4 +242,10 @@ const getTimeSlotsByDate = async (req, res) => {
   }
 };
 //
-export { createTimeSlot, updateTimeSlot , getTimeSlots, getTimeSlotsForPatient, getTimeSlotsByDate };
+export {
+  createTimeSlot,
+  updateTimeSlot,
+  getTimeSlots,
+  getTimeSlotsForPatient,
+  getTimeSlotsByDate,
+};

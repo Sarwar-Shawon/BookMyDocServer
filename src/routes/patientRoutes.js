@@ -21,6 +21,7 @@ import {
     createAppointment,
     getPatientAppointments,
     updateAppointment,
+    cancelAppointment
   } from "../controllers/appointmentController.js";
 //validator
 import {
@@ -60,5 +61,11 @@ patientRouter
 patientRouter
   .route("/get-appointments")
   .get(auth , checkAuthRole([roles.Patient]) , getPatientAppointments);
+patientRouter
+  .route("/cancel-appointments")
+  .put(auth , checkAuthRole([roles.Patient]) , cancelAppointment);
+patientRouter
+  .route("/update-appointments")
+  .put(auth , checkAuthRole([roles.Patient]) , updateAppointment);
 //
 export default patientRouter;

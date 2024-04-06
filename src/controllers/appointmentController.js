@@ -25,6 +25,17 @@ const createAppointment = async (req, res) => {
     if (!patient && !doctor) {
       return res.status(422).json({ success: false, error: "No data found" });
     }
+    const date1 = new Date(new Date(req.body.apt_date).setHours(0, 0, 0, 0));
+    const date2 = new Date(new Date().setHours(0, 0, 0, 0));
+    const currentTime = new Date();
+    if (date1.getTime() === date2.getTime()) {
+      const [hours, minutes] = req.body.timeslot.split(":");
+      const slotTime = new Date();
+      slotTime.setHours(hours, minutes, 0);
+      if (slotTime > currentTime) {
+        return res.status(422).json({ success: false, error: "You can not make this appointment, cause your selected time slot is not valid " });
+      }
+    }
     const params = {
       pt: patient._id,
       doc: doctor._id,
@@ -68,6 +79,7 @@ const createAppointment = async (req, res) => {
     res.status(200).json({
       success: true,
       data: saveApt,
+      message: "An appointment has created successfully."
     });
   } catch (err) {
     //return err
@@ -202,8 +214,10 @@ const updateAppointment = async (req, res) => {
       return res.status(422).json({ success: false, error: "No user found" });
     }
     const apt = await Appointments.findOne({ _id: req.body.apt_id })
+    .populate("dept", { _id: 1, name: 1 })
+      .populate("org", { _id: 1, name: 1, addr: 1 })
       .populate("doc", { _id: 1, f_name: 1, l_name: 1, doc_email: 1, img: 1 })
-      .populate("pt", { _id: 1, f_name: 1, l_name: 1, doc_email: 1, img: 1 });
+      .populate("pt", { _id: 1, f_name: 1, l_name: 1, doc_email: 1, img: 1 , nhs:1 });
     console.log("aptapt", apt);
     if (!apt) {
       return res
@@ -271,15 +285,18 @@ const getPatientAppointments = async (req, res) => {
         : 0;
     const limit = 10;
     console.log("startDaystartDaystartDaystartDay:", startDay);
+
     const appointments = await Appointments.find({
       pt: patient._id,
       apt_date: {
         $gte: startDay,
       },
+      status: req.query.status,
+
     })
       .populate("dept", { _id: 1, name: 1 })
       .populate("org", { _id: 1, name: 1, addr: 1 })
-      .populate("doc", { _id: 1, f_name: 1, l_name: 1, img: 1 })
+      .populate("doc", { _id: 1, f_name: 1, l_name: 1, img: 1 , doc_email: 1 })
       .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1 })
       .skip(skip)
       .limit(limit);
