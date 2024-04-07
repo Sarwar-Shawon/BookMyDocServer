@@ -23,38 +23,50 @@ import {
 } from "../controllers/appointmentController.js";
 //
 const doctorRouter = express.Router();
-//
+/*
+ * Profile
+ */
 doctorRouter
   .route("/get-profile")
   .get(auth, checkAuthRole([roles.Doctor]), getProfile);
 
-//timetable
+/*
+ * Timetable
+ */
 doctorRouter
   .route("/create-time-slots")
-  .post(auth, checkAuthRole([roles.Doctor]), createTimeSlot);
+  .post(verifyDoctor, checkAuthRole([roles.Doctor]), createTimeSlot);
 doctorRouter
   .route("/update-time-slots")
-  .post(auth, checkAuthRole([roles.Doctor]), updateTimeSlot);
+  .post(verifyDoctor, checkAuthRole([roles.Doctor]), updateTimeSlot);
 doctorRouter
   .route("/get-time-slots")
-  .get(auth, checkAuthRole([roles.Doctor]), getTimeSlots);
+  .get(verifyDoctor, checkAuthRole([roles.Doctor]), getTimeSlots);
 doctorRouter
   .route("/get-time-slots-by-date")
-  .get(auth, checkAuthRole([roles.Doctor]), getTimeSlotsByDate);
+  .get(verifyDoctor, checkAuthRole([roles.Doctor]), getTimeSlotsByDate);
+/*
+ * Appointments
+ */
 doctorRouter
   .route("/get-appointments")
   .get(verifyDoctor, checkAuthRole([roles.Doctor]), getDoctorAppointments);
 doctorRouter
   .route("/accept-appointments")
-  .put(auth, checkAuthRole([roles.Doctor]), acceptAppointment);
+  .put(verifyDoctor, checkAuthRole([roles.Doctor]), acceptAppointment);
 doctorRouter
   .route("/update-appointments")
-  .put(auth, checkAuthRole([roles.Doctor]), updateAppointment);
+  .put(verifyDoctor, checkAuthRole([roles.Doctor]), updateAppointment);
 doctorRouter
   .route("/cancel-appointments")
-  .put(auth, checkAuthRole([roles.Doctor]), cancelAppointment);
+  .put(verifyDoctor, checkAuthRole([roles.Doctor]), cancelAppointment);
 doctorRouter
   .route("/get-appointments-history")
-  .get(auth, checkAuthRole([roles.Doctor]), getAppointmentsHistory);
+  .get(verifyDoctor, checkAuthRole([roles.Doctor]), getAppointmentsHistory);
+/*
+ * Prescriptions
+ */
+
+
 //
 export default doctorRouter;

@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import {getToken} from "../utils/getToken.js";
 import Nurses from "../models/nurses.js";
 import Doctors from "../models/doctors.js";
+import Patients from "../models/patients.js";
 //
 const auth = async (req, res, next) => {
   const accessToken = getToken(req.headers["authorization"]);
@@ -98,6 +99,20 @@ const verifyNurseForDoctor = async (req, res, next) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 };
-
+// verify patient
+const verifyPatient = async (req, res, next) => {
+  try {
+    const token = getToken(req.headers["authorization"]);
+    const curUser = jwt.decode(token);
+    const patient = await Patients.findOne({ pt_email: curUser.email });
+    if (!patient) {
+      return res.status(422).json({ success: false, error: "No user found" });
+    }
+    req.patient = patient;
+    next();
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
 //
-export { auth, checkAuthRole, verifyDoctor, verifyNurseForDoctor };
+export { auth, checkAuthRole, verifyDoctor, verifyNurseForDoctor, verifyPatient };

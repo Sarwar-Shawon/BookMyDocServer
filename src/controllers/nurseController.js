@@ -53,6 +53,4 @@ const getAttachDoctors = async (req, res) => {
   }
 };
 //
-
-//
 export { getProfile, getAttachDoctors };

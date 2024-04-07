@@ -29,43 +29,52 @@ import {
   nurseRegisterValidator,
 } from "../Validator/adminControllerValidator.js";
 //authurization check
-import { auth, checkAuthRole } from "../middleware/auth.js";
+import { auth, checkAuthRole, verifyPatient } from "../middleware/auth.js";
 import roles from "../helpers/roles.js";
 import { upload } from "../utils/uploadImage.js";
 //
 const patientRouter = express.Router();
-//
+/*
+ * Profile
+ */
 patientRouter
   .route("/get-profile")
   .get(auth, checkAuthRole([roles.Patient]), getProfile);
-//
+/*
+ * Department
+ */
 patientRouter
   .route("/get-dept")
   .get(auth , checkAuthRole([roles.Patient]) , getDepartments);
-//
+/*
+ * Get Doctors
+ */
 patientRouter
   .route("/get-doctors")
-  .get(auth , checkAuthRole([roles.Patient]) , getDoctorsByDepartment);
-//
+  .get(auth , checkAuthRole([roles.Patient]) , getDoctorsByDepartment); 
 patientRouter
   .route("/get-all-doctors")
   .get(auth , checkAuthRole([roles.Patient]) , getDoctors);
-//
+/*
+ * Timeslots
+ */
 patientRouter
   .route("/get-time-slots")
   .get(auth , checkAuthRole([roles.Patient]) , getTimeSlotsForPatient);
-//
+/*
+ * Appointments
+ */
 patientRouter
   .route("/create-appointment")
   .post(auth , checkAuthRole([roles.Patient]) , createAppointment);
 patientRouter
   .route("/get-appointments")
-  .get(auth , checkAuthRole([roles.Patient]) , getPatientAppointments);
+  .get(verifyPatient , checkAuthRole([roles.Patient]) , getPatientAppointments);
 patientRouter
   .route("/cancel-appointments")
-  .put(auth , checkAuthRole([roles.Patient]) , cancelAppointment);
+  .put(verifyPatient , checkAuthRole([roles.Patient]) , cancelAppointment);
 patientRouter
   .route("/update-appointments")
-  .put(auth , checkAuthRole([roles.Patient]) , updateAppointment);
+  .put(verifyPatient , checkAuthRole([roles.Patient]) , updateAppointment);
 //
 export default patientRouter;

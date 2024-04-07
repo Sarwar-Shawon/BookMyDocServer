@@ -4,13 +4,6 @@
 import Doctors from "../models/doctors.js";
 import jwt from "jsonwebtoken";
 import {getToken} from "../utils/getToken.js";
-
-// import mailSender from "../services/mailSender.js";
-// import path from "path";
-// import { fileURLToPath } from "url";
-// import { dirname } from "path";
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = dirname(__filename);
 //
 const getProfile = async (req, res) => {
   try {
@@ -34,6 +27,5 @@ const getProfile = async (req, res) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 };
-
 //
 export { getProfile };

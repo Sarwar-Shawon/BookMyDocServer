@@ -23,13 +23,15 @@ const dayMapping = {
 const createTimeSlot = async (req, res) => {
   try {
     //
-    const token = getToken(req.headers["authorization"]);
-    //
-    const curUser = jwt.decode(token);
-    const doctor = await Doctors.findOne({ doc_email: curUser.email });
-    if (!doctor) {
-      return res.status(422).json({ success: false, error: "No doctor found" });
-    }
+    // const token = getToken(req.headers["authorization"]);
+    // //
+    // const curUser = jwt.decode(token);
+    // const doctor = await Doctors.findOne({ doc_email: curUser.email });
+    // if (!doctor) {
+    //   return res.status(422).json({ success: false, error: "No doctor found" });
+    // }
+    const doctor = req.doctor;
+
     const timeSlots = new TimeSlots({
       timeSlots: req.body.timeSlots,
       doctor: doctor._id,
@@ -51,13 +53,15 @@ const createTimeSlot = async (req, res) => {
 const updateTimeSlot = async (req, res) => {
   try {
     //
-    const token = getToken(req.headers["authorization"]);
-    //
-    const curUser = jwt.decode(token);
-    const doctor = await Doctors.findOne({ doc_email: curUser.email });
-    if (!doctor) {
-      return res.status(422).json({ success: false, error: "No doctor found" });
-    }
+    // const token = getToken(req.headers["authorization"]);
+    // //
+    // const curUser = jwt.decode(token);
+    // const doctor = await Doctors.findOne({ doc_email: curUser.email });
+    // if (!doctor) {
+    //   return res.status(422).json({ success: false, error: "No doctor found" });
+    // }
+    const doctor = req.doctor;
+    
     const doctorSlots = await TimeSlots.findOne({
       doctor: doctor._id,
     });
@@ -79,12 +83,13 @@ const updateTimeSlot = async (req, res) => {
 const getTimeSlots = async (req, res) => {
   try {
     //
-    const token = getToken(req.headers["authorization"]);
-    const curUser = jwt.decode(token);
-    const doctor = await Doctors.findOne({ doc_email: curUser.email });
-    if (!doctor) {
-      return res.status(422).json({ success: false, error: "No doctor found" });
-    }
+    // const token = getToken(req.headers["authorization"]);
+    // const curUser = jwt.decode(token);
+    // const doctor = await Doctors.findOne({ doc_email: curUser.email });
+    // if (!doctor) {
+    //   return res.status(422).json({ success: false, error: "No doctor found" });
+    // }
+    const doctor = req.doctor;
     console.log("req.query.date::", req.query.date);
     const date = new Date(req.query.date);
     //
@@ -173,12 +178,14 @@ const getTimeSlotsForPatient = async (req, res) => {
 const getTimeSlotsByDate = async (req, res) => {
   try {
     //
-    const token = getToken(req.headers["authorization"]);
-    const curUser = jwt.decode(token);
-    const doctor = await Doctors.findOne({ doc_email: curUser.email });
-    if (!doctor) {
-      return res.status(422).json({ success: false, error: "No doctor found" });
-    }
+    // const token = getToken(req.headers["authorization"]);
+    // const curUser = jwt.decode(token);
+    // const doctor = await Doctors.findOne({ doc_email: curUser.email });
+    // if (!doctor) {
+    //   return res.status(422).json({ success: false, error: "No doctor found" });
+    // }
+    const doctor = req.doctor;
+
     console.log("req.query.date::", req.query.date);
     const date = new Date(req.query.date);
     console.log("req.query.date::", date);
