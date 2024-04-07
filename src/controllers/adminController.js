@@ -80,7 +80,7 @@ const registerNewDoctror = async (req, res) => {
     //save to db
     const saveData = await doctor.save();
     //
-    await Doctors.populate(updData, [
+    await Doctors.populate(saveData, [
       { path: "dept", select: { _id: 1, name: 1 } },
       { path: "organization", select: { _id: 1, name: 1, addr: 1 } },
     ]);

@@ -94,10 +94,11 @@ const getTimeSlots = async (req, res) => {
     const date = new Date(req.query.date);
     //
     const data = await TimeSlots.findOne({ doctor: doctor._id });
+    console.log("data",data)
     //
     res.status(200).json({
       success: true,
-      data: data.timeSlots,
+      data: data?.timeSlots || {},
     });
   } catch (err) {
     //return err
