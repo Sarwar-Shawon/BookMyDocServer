@@ -166,10 +166,11 @@ const getAllDoctors = async (req, res) => {
       req.query.skip && /^\d+$/.test(req.query.skip)
         ? Number(req.query.skip)
         : 0;
-    const limit = 10;
+    const limit = req.query.limit || 15;
     const doctors = await Doctors.find({})
       .populate("dept", { _id: 1, name: 1 })
       .populate("organization", { _id: 1, name: 1, addr: 1 })
+      .skip(skip)
       .limit(limit);
     //
     res.status(200).json({
@@ -296,7 +297,8 @@ const getAllNurses = async (req, res) => {
       req.query.skip && /^\d+$/.test(req.query.skip)
         ? Number(req.query.skip)
         : 0;
-    const limit = 10;
+        const limit = req.query.limit || 15;
+
     const nurses = await Nurses.find({})
       .populate("dept", { _id: 1, name: 1 })
       .populate("organization", { _id: 1, name: 1, addr: 1 })
@@ -441,7 +443,8 @@ const getAllPharmacies = async (req, res) => {
       req.query.skip && /^\d+$/.test(req.query.skip)
         ? Number(req.query.skip)
         : 0;
-    const limit = 10;
+        const limit = req.query.limit || 15;
+
     const pharmacies = await Pharmacies.find({})
       .populate("org", { _id: 1, name: 1})
       .skip(skip)

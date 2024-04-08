@@ -61,7 +61,7 @@ const updateTimeSlot = async (req, res) => {
     //   return res.status(422).json({ success: false, error: "No doctor found" });
     // }
     const doctor = req.doctor;
-    
+
     const doctorSlots = await TimeSlots.findOne({
       doctor: doctor._id,
     });
@@ -94,7 +94,7 @@ const getTimeSlots = async (req, res) => {
     const date = new Date(req.query.date);
     //
     const data = await TimeSlots.findOne({ doctor: doctor._id });
-    console.log("data",data)
+    console.log("data", data);
     //
     res.status(200).json({
       success: true,
@@ -150,8 +150,10 @@ const getTimeSlotsForPatient = async (req, res) => {
     let timeSlotsData = data?.timeSlots[day];
     //
     const currentTime = new Date();
-    const date1 = moment(new Date(req.query.date.replace(/GMT.*$/, ''))).format('DD/MM/YYYY');
-    const date2 = moment(new Date()).format('DD/MM/YYYY');
+    const date1 = moment(new Date(req.query.date.replace(/GMT.*$/, ""))).format(
+      "DD/MM/YYYY"
+    );
+    const date2 = moment(new Date()).format("DD/MM/YYYY");
     if (date1 === date2) {
       const futureTimeSlots = {};
       Object.keys(timeSlotsData).forEach((key) => {
@@ -188,7 +190,7 @@ const getTimeSlotsByDate = async (req, res) => {
     const doctor = req.doctor;
 
     console.log("req.query.date::", req.query.date);
-    const date = new Date(req.query.date);
+    const date = new Date(req.query.date.replace(/GMT.*$/, ""));
     console.log("req.query.date::", date);
 
     const startOfDay = new Date(date);
@@ -196,14 +198,18 @@ const getTimeSlotsByDate = async (req, res) => {
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
     const day = dayMapping[startOfDay.getDay()];
-
+    console.log("startOfDay:::", startOfDay);
+    console.log("endOfDay:::", endOfDay);
+    console.log("day:::", day);
     const timeSlotsAvailabilityData = await Appointments.find({
       doc: doctor._id,
       apt_date: {
         $gte: startOfDay,
         $lte: endOfDay,
       },
-    });
+    })
+      .populate("doc")
+      .populate("pt");
     //
     console.log("timeSlotsAvailabilityData", timeSlotsAvailabilityData);
     //
@@ -211,21 +217,27 @@ const getTimeSlotsByDate = async (req, res) => {
     if (timeSlotsAvailabilityData) {
       timeSlotsAvailabilityData.map((item) => {
         if (data.timeSlots[day] && data.timeSlots[day][item.timeslot]) {
-          console.log(
-            "data.timeSlots[day][item.timeslot]",
-            data.timeSlots[day][item.timeslot]
-          );
           data.timeSlots[day][item.timeslot].active = false;
           data.timeSlots[day][item.timeslot].aptId = item._id;
+          data.timeSlots[day][item.timeslot].apt = item;
+          
         }
       });
     }
 
     let timeSlotsData = data?.timeSlots[day];
     //
+    if (req.query.skip_con) {
+      return res.status(200).json({
+        success: true,
+        data: { [day]: timeSlotsData } || {},
+      });
+    }
     const currentTime = new Date();
-    const date1 = moment(new Date(req.query.date.replace(/GMT.*$/, ''))).format('DD/MM/YYYY');
-    const date2 = moment(new Date()).format('DD/MM/YYYY');
+    const date1 = moment(new Date(req.query.date.replace(/GMT.*$/, ""))).format(
+      "DD/MM/YYYY"
+    );
+    const date2 = moment(new Date()).format("DD/MM/YYYY");
     if (date1 === date2) {
       const futureTimeSlots = {};
       Object.keys(timeSlotsData).forEach((key) => {

@@ -103,9 +103,17 @@ const getDoctorsByDepartment = async (req, res) => {
       req.query.skip && /^\d+$/.test(req.query.skip)
         ? Number(req.query.skip)
         : 0;
-    const limit = 10;
-    const doctors = await Doctors.find({dept: req.query.dept}, undefined, { skip, limit }).populate("dept", { '_id': 1, 'name': 1 }) 
-    .populate("organization", { '_id': 1, 'name': 1, 'addr': 1 }) 
+    const limit = req.query.limit || 15;
+
+    const doctors = await Doctors.find({
+      dept: req.query.dept,
+      active: true
+    })
+      .populate("dept", { _id: 1, name: 1 })
+      .populate("organization", { _id: 1, name: 1, addr: 1 })
+      .skip(skip)
+      .limit(limit);
+
     res.status(200).json({
       success: true,
       data: doctors,

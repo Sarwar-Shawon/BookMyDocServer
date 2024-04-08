@@ -33,8 +33,14 @@ const createAppointment = async (req, res) => {
       const [hours, minutes] = req.body.timeslot.split(":");
       const slotTime = new Date();
       slotTime.setHours(hours, minutes, 0);
-      if (slotTime > currentTime) {
-        return res.status(422).json({ success: false, error: "You can not make this appointment, cause your selected time slot is not valid " });
+      if (currentTime > slotTime) {
+        return res
+          .status(422)
+          .json({
+            success: false,
+            error:
+              "You can not make this appointment, cause your selected time slot is not valid ",
+          });
       }
     }
     const params = {
@@ -80,7 +86,7 @@ const createAppointment = async (req, res) => {
     res.status(200).json({
       success: true,
       data: saveApt,
-      message: "An appointment has created successfully."
+      message: "An appointment has created successfully.",
     });
   } catch (err) {
     //return err
@@ -215,10 +221,17 @@ const updateAppointment = async (req, res) => {
     //   return res.status(422).json({ success: false, error: "No user found" });
     // }
     const apt = await Appointments.findOne({ _id: req.body.apt_id })
-    .populate("dept", { _id: 1, name: 1 })
+      .populate("dept", { _id: 1, name: 1 })
       .populate("org", { _id: 1, name: 1, addr: 1 })
       .populate("doc", { _id: 1, f_name: 1, l_name: 1, doc_email: 1, img: 1 })
-      .populate("pt", { _id: 1, f_name: 1, l_name: 1, doc_email: 1, img: 1 , nhs:1 });
+      .populate("pt", {
+        _id: 1,
+        f_name: 1,
+        l_name: 1,
+        doc_email: 1,
+        img: 1,
+        nhs: 1,
+      });
     console.log("aptapt", apt);
     if (!apt) {
       return res
@@ -244,8 +257,8 @@ const updateAppointment = async (req, res) => {
         "DD-MM-YYYY"
       )} <strong>Time:</strong> ${apt.timeslot} .</n>
       <strong>Doctor: </strong> ${[apt?.doc?.f_name, apt?.doc?.l_name].join(
-            " "
-          )} .</n>
+        " "
+      )} .</n>
           <strong> Patient:</strong>  ${[apt?.pt?.f_name, apt?.pt?.l_name].join(
             " "
           )}.</n>
@@ -282,7 +295,8 @@ const getDoctorAppointments = async (req, res) => {
       req.query.skip && /^\d+$/.test(req.query.skip)
         ? Number(req.query.skip)
         : 0;
-    const limit = 10;
+    const limit = req.query.limit || 10;
+
     const _type = req.query.status;
     const appointments = await Appointments.find({
       doc: doctor._id,
@@ -344,22 +358,25 @@ const getAppointmentsHistory = async (req, res) => {
       req.query.skip && /^\d+$/.test(req.query.skip)
         ? Number(req.query.skip)
         : 0;
-    const limit = 10;
+    const limit = req.query.limit || 10;
+
     //
     const params = {
       apt_date: {
         $gte: startDay,
-        $lte: endDay
-      }
-    }
-    if(curUser.roles.toLowerCase() == "patient")
-      params.pt = user._id
-    if(curUser.roles.toLowerCase() == "doctor" || curUser.roles.toLowerCase() == "nurse")
-      params.doc = user._id
-    if(req.query.status)
-      params.status = req.query.status
+        $lte: endDay,
+      },
+    };
+    if (curUser.roles.toLowerCase() == "patient") params.pt = user._id;
+    if (
+      curUser.roles.toLowerCase() == "doctor" ||
+      curUser.roles.toLowerCase() == "nurse"
+    )
+      params.doc = user._id;
+    if (req.query.status) params.status = req.query.status;
 
-    const appointments = await Appointments.find(params).populate("dept", { _id: 1, name: 1 })
+    const appointments = await Appointments.find(params)
+      .populate("dept", { _id: 1, name: 1 })
       .populate("org")
       .populate("doc")
       .populate("pt")
@@ -375,7 +392,6 @@ const getAppointmentsHistory = async (req, res) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 };
-//
 //
 const getPatientAppointments = async (req, res) => {
   try {
@@ -399,7 +415,7 @@ const getPatientAppointments = async (req, res) => {
       req.query.skip && /^\d+$/.test(req.query.skip)
         ? Number(req.query.skip)
         : 0;
-    const limit = 10;
+    const limit = req.query.limit || 10;
     console.log("startDaystartDaystartDaystartDay:", startDay);
 
     const appointments = await Appointments.find({
@@ -408,11 +424,10 @@ const getPatientAppointments = async (req, res) => {
         $gte: startDay,
       },
       status: req.query.status,
-
     })
       .populate("dept", { _id: 1, name: 1 })
       .populate("org", { _id: 1, name: 1, addr: 1 })
-      .populate("doc", { _id: 1, f_name: 1, l_name: 1, img: 1 , doc_email: 1 })
+      .populate("doc", { _id: 1, f_name: 1, l_name: 1, img: 1, doc_email: 1 })
       .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1 })
       .skip(skip)
       .limit(limit);
@@ -421,6 +436,28 @@ const getPatientAppointments = async (req, res) => {
     res.status(200).json({
       success: true,
       data: appointments,
+    });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+//
+const getSingleAppointment = async (req, res) => {
+  try {
+    //
+    const apt = await Appointments.findOne({ _id: req.body.apt_id })
+      .populate("doc")
+      .populate("pt");
+    if (!apt) {
+      return res
+        .status(422)
+        .json({ success: false, error: "No appointment found" });
+    }
+    //
+    res.status(200).json({
+      success: true,
+      data: apt,
     });
   } catch (err) {
     //return err
@@ -436,4 +473,5 @@ export {
   updateAppointment,
   cancelAppointment,
   getAppointmentsHistory,
+  getSingleAppointment
 };
