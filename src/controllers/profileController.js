@@ -5,7 +5,6 @@ import Patients from "../models/patients.js";
 import Doctors from "../models/doctors.js";
 import Nurses from "../models/nurses.js";
 import Pharmacy from "../models/pharmacies.js";
-import Users from "../models/users.js";
 import { getToken } from "../utils/getToken.js";
 import jwt from "jsonwebtoken";
 import mailSender from "../services/mailSender.js";
@@ -20,7 +19,10 @@ const getProfile = async (req, res) => {
     let user = {}
 
     if(curUser.roles.toLowerCase() == "doctor"){
-        user =  await Doctors.findOne({ doc_email: curUser.email });
+        user =  await Doctors.findOne({ doc_email: curUser.email })
+        .populate("dept", { _id: 1, name: 1 })
+        .populate("organization", { _id: 1, name: 1, addr: 1 })
+        .populate('nurses', { _id: 1, f_name: 1, l_name: 1 });
     }
     else if(curUser.roles.toLowerCase() == "patient"){
         user =  await Patients.findOne({ pt_email: curUser.email });
@@ -45,7 +47,63 @@ const getProfile = async (req, res) => {
   }
 };
 //
+const updateProfile = async (req, res) => {
+  try {
+    const token = getToken(req.headers["authorization"]);
+    const curUser = jwt.decode(token);
+    if (!curUser) {
+      return res.status(422).json({ success: false, error: "user not found" });
+    }
+    let user;
+    const params = req.body;
+    let imgUrl = "";
+    if (req.file?.filename) {
+      imgUrl = req.file.filename;
+    }
+    if(imgUrl)
+      params.img = imgUrl
+    
+    console.log("paramsparamsparamsparams:::", params)
+
+    if (curUser.roles.toLowerCase() === "doctor") {
+      user = await Doctors.findOneAndUpdate(
+        { doc_email: curUser.email },
+        params,
+        { new: true }
+      );
+    } else if (curUser.roles.toLowerCase() === "patient") {
+      user = await Patients.findOneAndUpdate(
+        { pt_email: curUser.email },
+        params,
+        { new: true }
+      );
+    } else if (curUser.roles.toLowerCase() === "nurse") {
+      user = await Nurses.findOneAndUpdate(
+        { nur_email: curUser.email },
+        params,
+        { new: true }
+      );
+    } else if (curUser.roles.toLowerCase() === "pharmacy") {
+      user = await Pharmacy.findOneAndUpdate(
+        { phr_email: curUser.email },
+        params,
+        { new: true }
+      );
+    } else {
+      return res.status(422).json({ success: false, error: "user not found" });
+    }
+    if (!user) {
+      return res.status(422).json({ success: false, error: "user not found" });
+    }
+    return res.status(200).json({ success: true, data: user });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+//
 export {
   //
-  getProfile
+  getProfile,
+  updateProfile
 };

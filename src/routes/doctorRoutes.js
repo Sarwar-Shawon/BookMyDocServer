@@ -3,7 +3,8 @@
  */
 import express from "express";
 import { createTimeSlot,updateTimeSlot , getTimeSlots, getTimeSlotsByDate } from "../controllers/timeSlotController.js";
-import { getProfile } from "../controllers/doctorController.js";
+// import { getProfile } from "../controllers/doctorController.js";
+import { getProfile,updateProfile } from "../controllers/profileController.js";
 //validator
 import {
   doctorRegisterValidator,
@@ -29,6 +30,9 @@ const doctorRouter = express.Router();
 doctorRouter
   .route("/get-profile")
   .get(auth, checkAuthRole([roles.Doctor]), getProfile);
+doctorRouter
+  .route("/update-profile")
+  .put(auth, checkAuthRole([roles.Doctor]),upload.single("img"), updateProfile);
 
 /*
  * Timetable
