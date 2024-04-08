@@ -209,7 +209,9 @@ const getTimeSlotsByDate = async (req, res) => {
       },
     })
       .populate("doc")
-      .populate("pt");
+      .populate("pt")
+      .populate("dept", { _id: 1, name: 1 })
+      .populate("org", { _id: 1, name: 1, addr: 1 })
     //
     console.log("timeSlotsAvailabilityData", timeSlotsAvailabilityData);
     //

@@ -19,6 +19,10 @@ const prescriptionsSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Pharmacies"
   },
+  apt_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Appointments"
+  },
   createdAt:{
     type: Date,
     default: Date.now,
@@ -27,17 +31,17 @@ const prescriptionsSchema = new mongoose.Schema({
   status: {
     type: String,
     default: "Created",
-    enum: ["Created", "Published" ],
+    enum: ["Created", "Published" , "Delivered"],
     required: true
   },
   pulished_dt:{
     type: Date,
     default: Date.now,
   },
-  pr_data: {
-    type: String,
-    default: "",
-  },
+  reasons: [],
+  medications: [],
+  tests: [],
+  investigations: [],
 });
 //
 const Prescriptions = mongoose.model("Prescriptions", prescriptionsSchema);

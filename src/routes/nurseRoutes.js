@@ -9,9 +9,12 @@ import {
   getTimeSlotsByDate
 } from "../controllers/timeSlotController.js";
 import {
-  getProfile,
   getAttachDoctors,
 } from "../controllers/nurseController.js";
+import {
+  getProfile,
+  updateProfile
+} from "../controllers/profileController.js";
 import { getDepartments } from "../controllers/departmentController.js";
 import {
   getDoctorAppointments,
@@ -41,6 +44,9 @@ const nurseRouter = express.Router();
 nurseRouter
   .route("/get-profile")
   .get(auth, checkAuthRole([roles.Nurse]), getProfile);
+nurseRouter
+  .route("/update-profile")
+  .put(auth, checkAuthRole([roles.Nurse]),upload.single("img"), updateProfile);
 /*
  * Get Attach Doctor
  */

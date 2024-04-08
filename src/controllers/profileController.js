@@ -28,7 +28,9 @@ const getProfile = async (req, res) => {
         user =  await Patients.findOne({ pt_email: curUser.email });
     }
     else if(curUser.roles.toLowerCase() == "nurse"){
-        user =  await Nurses.findOne({ nur_email: curUser.email });
+        user =  await Nurses.findOne({ nur_email: curUser.email })
+        .populate("dept", { _id: 1, name: 1 })
+        .populate("organization", { _id: 1, name: 1, addr: 1 });
     }
     else if(curUser.roles.toLowerCase() == "pharmacy"){
         user =  await Pharmacy.findOne({ phr_email: curUser.email });
