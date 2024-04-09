@@ -64,8 +64,6 @@ const updateProfile = async (req, res) => {
     }
     if(imgUrl)
       params.img = imgUrl
-    
-    console.log("paramsparamsparamsparams:::", params)
 
     if (curUser.roles.toLowerCase() === "doctor") {
       user = await Doctors.findOneAndUpdate(
@@ -97,7 +95,7 @@ const updateProfile = async (req, res) => {
     if (!user) {
       return res.status(422).json({ success: false, error: "user not found" });
     }
-    return res.status(200).json({ success: true, data: user });
+    return res.status(200).json({ success: true, data: user , message: "You have updated profile successfully." });
   } catch (err) {
     //return err
     return res.status(500).json({ success: false, error: err.message });

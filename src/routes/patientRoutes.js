@@ -2,7 +2,11 @@
  * @copyRight by md sarwar hoshen.
  */
 import express from "express";
-import { getProfile } from "../controllers/doctorController.js";
+//
+import {
+  getProfile,
+  updateProfile
+} from "../controllers/profileController.js";
 //
 import {
     getDepartments,
@@ -40,6 +44,9 @@ const patientRouter = express.Router();
 patientRouter
   .route("/get-profile")
   .get(auth, checkAuthRole([roles.Patient]), getProfile);
+patientRouter
+  .route("/update-profile")
+  .put(auth, checkAuthRole([roles.Patient]),upload.single("img"), updateProfile);
 /*
  * Department
  */
