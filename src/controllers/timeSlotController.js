@@ -10,7 +10,7 @@ import { getToken } from "../utils/getToken.js";
 import moment from "moment";
 
 //
-const dayMapping = {
+const _days = {
   0: "sunday",
   1: "monday",
   2: "tuesday",
@@ -118,6 +118,7 @@ const getTimeSlotsForPatient = async (req, res) => {
     if (!patient && !doctor) {
       return res.status(422).json({ success: false, error: "No data found" });
     }
+
     //
     const date = new Date(req.query.date);
     const startOfDay = new Date(req.query.startDay || date);
@@ -125,12 +126,22 @@ const getTimeSlotsForPatient = async (req, res) => {
     const endOfDay = new Date(req.query.endDay || date);
     endOfDay.setUTCHours(23, 59, 59, 999);
     //
-    const day = dayMapping[startOfDay.getDay()];
+    const day = _days[startOfDay.getDay()];
     // console.log("aaaaaa:", moment(startOfDay).format("DD-MM-YYYY"));
     //
     const data = await TimeSlots.findOne({ doctor: doctor._id });
     //check doctor availability
-    
+    console.log("data?.holidays", data);
+    if (
+      data?.holidays?.length > 0 &&
+      checkDateExistInHolidays(data?.holidays, date)
+    ) {
+      console.log("doctor in holiday");
+      return res.status(200).json({
+        success: true,
+        data: {},
+      });
+    }
     //check with existing appointments
     const timeSlotsAvailabilityData = await Appointments.find({
       doc: doctor._id,
@@ -198,10 +209,25 @@ const getTimeSlotsByDate = async (req, res) => {
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
-    const day = dayMapping[startOfDay.getDay()];
+    const day = _days[startOfDay.getDay()];
     console.log("startOfDay:::", startOfDay);
     console.log("endOfDay:::", endOfDay);
     console.log("day:::", day);
+    
+    //
+    console.log("timeSlotsAvailabilityData", timeSlotsAvailabilityData);
+    //
+    const data = await TimeSlots.findOne({ doctor: doctor._id });
+    if (
+      data?.holidays?.length > 0 &&
+      checkDateExistInHolidays(data?.holidays, date)
+    ) {
+      console.log("doctor in holiday");
+      return res.status(200).json({
+        success: true,
+        data: {},
+      });
+    }
     const timeSlotsAvailabilityData = await Appointments.find({
       doc: doctor._id,
       apt_date: {
@@ -213,10 +239,6 @@ const getTimeSlotsByDate = async (req, res) => {
       .populate("pt")
       .populate("dept", { _id: 1, name: 1 })
       .populate("org", { _id: 1, name: 1, addr: 1 });
-    //
-    console.log("timeSlotsAvailabilityData", timeSlotsAvailabilityData);
-    //
-    const data = await TimeSlots.findOne({ doctor: doctor._id });
     if (timeSlotsAvailabilityData) {
       timeSlotsAvailabilityData.map((item) => {
         if (data.timeSlots[day] && data.timeSlots[day][item.timeslot]) {
@@ -302,11 +324,15 @@ const updateHolidays = async (req, res) => {
   }
 };
 //checkDateExistInHolidays
-const checkDateExistInHolidays = (dateRanges, dateToCheck) => {
-  const dateToCheckMoment = moment(dateToCheck, "DD-MM-YYYY");
+const checkDateExistInHolidays = (dateRanges, dt) => {
+  const dateToCheckMoment = moment(dt, "DD-MM-YYYY");
+  console.log("dateToCheckMoment::", dateToCheckMoment);
   for (const range of dateRanges) {
     const startDate = moment(range.start_date, "DD-MM-YYYY");
     const endDate = moment(range.end_date, "DD-MM-YYYY");
+    console.log("startDate::", startDate);
+    console.log("endDate::", endDate);
+
     if (dateToCheckMoment.isBetween(startDate, endDate, null, "[]")) {
       return true;
     }
