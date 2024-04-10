@@ -2,7 +2,7 @@
  * @copyRight by md sarwar hoshen.
  */
 import express from "express";
-import { createTimeSlot,updateTimeSlot , getTimeSlots, getTimeSlotsByDate } from "../controllers/timeSlotController.js";
+import { createTimeSlot,updateTimeSlot , getTimeSlots, getTimeSlotsByDate, getHolidays, updateHolidays } from "../controllers/timeSlotController.js";
 // import { getProfile } from "../controllers/doctorController.js";
 import { getProfile,updateProfile } from "../controllers/profileController.js";
 //validator
@@ -34,6 +34,15 @@ doctorRouter
   .route("/update-profile")
   .put(auth, checkAuthRole([roles.Doctor]),upload.single("img"), updateProfile);
 
+/*
+ * Holidays
+ */
+doctorRouter
+  .route("/get-holidays")
+  .get(verifyDoctor, checkAuthRole([roles.Doctor]), getHolidays);
+doctorRouter
+  .route("/update-holidays")
+  .put(verifyDoctor, checkAuthRole([roles.Doctor]), updateHolidays);
 /*
  * Timetable
  */

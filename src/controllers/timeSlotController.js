@@ -126,6 +126,12 @@ const getTimeSlotsForPatient = async (req, res) => {
     endOfDay.setUTCHours(23, 59, 59, 999);
     //
     const day = dayMapping[startOfDay.getDay()];
+    // console.log("aaaaaa:", moment(startOfDay).format("DD-MM-YYYY"));
+    //
+    const data = await TimeSlots.findOne({ doctor: doctor._id });
+    //check doctor availability
+    
+    //check with existing appointments
     const timeSlotsAvailabilityData = await Appointments.find({
       doc: doctor._id,
       apt_date: {
@@ -134,11 +140,6 @@ const getTimeSlotsForPatient = async (req, res) => {
       },
     });
     //
-    console.log("timeSlotsAvailabilityData", timeSlotsAvailabilityData);
-    //
-    const data = await TimeSlots.findOne({ doctor: doctor._id });
-    console.log("data:::", data);
-
     if (timeSlotsAvailabilityData.length) {
       timeSlotsAvailabilityData.map((item) => {
         if (data.timeSlots[day] && data.timeSlots[day][item.timeslot]) {
@@ -211,7 +212,7 @@ const getTimeSlotsByDate = async (req, res) => {
       .populate("doc")
       .populate("pt")
       .populate("dept", { _id: 1, name: 1 })
-      .populate("org", { _id: 1, name: 1, addr: 1 })
+      .populate("org", { _id: 1, name: 1, addr: 1 });
     //
     console.log("timeSlotsAvailabilityData", timeSlotsAvailabilityData);
     //
@@ -222,7 +223,6 @@ const getTimeSlotsByDate = async (req, res) => {
           data.timeSlots[day][item.timeslot].active = false;
           data.timeSlots[day][item.timeslot].aptId = item._id;
           data.timeSlots[day][item.timeslot].apt = item;
-          
         }
       });
     }
@@ -263,6 +263,57 @@ const getTimeSlotsByDate = async (req, res) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 };
+//getHolidays
+const getHolidays = async (req, res) => {
+  try {
+    const doctor = req.doctor;
+    const data = await TimeSlots.findOne({ doctor: doctor._id });
+    console.log("data", data);
+    //
+    res.status(200).json({
+      success: true,
+      data: data?.holidays || [],
+    });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+//updateHolidays
+const updateHolidays = async (req, res) => {
+  try {
+    const doctor = req.doctor;
+    const timeslot = await TimeSlots.findOne({ doctor: doctor._id });
+    //
+    if (!timeslot) {
+      return res.status(500).json({ success: false, error: "no data found" });
+    }
+    console.log("req.body.holidays", req.body.holidays);
+    timeslot.holidays = req.body.holidays;
+    await timeslot.save();
+    //
+    res.status(200).json({
+      success: true,
+      data: timeslot?.holidays || [],
+    });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+//checkDateExistInHolidays
+const checkDateExistInHolidays = (dateRanges, dateToCheck) => {
+  const dateToCheckMoment = moment(dateToCheck, "DD-MM-YYYY");
+  for (const range of dateRanges) {
+    const startDate = moment(range.start_date, "DD-MM-YYYY");
+    const endDate = moment(range.end_date, "DD-MM-YYYY");
+    if (dateToCheckMoment.isBetween(startDate, endDate, null, "[]")) {
+      return true;
+    }
+  }
+  return false;
+};
+
 //
 export {
   createTimeSlot,
@@ -270,4 +321,6 @@ export {
   getTimeSlots,
   getTimeSlotsForPatient,
   getTimeSlotsByDate,
+  getHolidays,
+  updateHolidays,
 };

@@ -6,7 +6,9 @@ import {
   createTimeSlot,
   updateTimeSlot,
   getTimeSlots,
-  getTimeSlotsByDate
+  getTimeSlotsByDate,
+  getHolidays,
+  updateHolidays
 } from "../controllers/timeSlotController.js";
 import {
   getAttachDoctors,
@@ -47,6 +49,8 @@ nurseRouter
 nurseRouter
   .route("/update-profile")
   .put(auth, checkAuthRole([roles.Nurse]),upload.single("img"), updateProfile);
+
+
 /*
  * Get Attach Doctor
  */
@@ -59,6 +63,16 @@ nurseRouter
 nurseRouter
   .route("/getAllDepartments")
   .get(auth, checkAuthRole([roles.Nurse]), getDepartments);
+
+/*
+ * Holidays
+ */
+nurseRouter
+  .route("/get-holidays")
+  .get(verifyNurseForDoctor, checkAuthRole([roles.Nurse]), getHolidays);
+  nurseRouter
+  .route("/update-holidays")
+  .put(verifyNurseForDoctor, checkAuthRole([roles.Nurse]), updateHolidays);
 
 /*
  * Timetable

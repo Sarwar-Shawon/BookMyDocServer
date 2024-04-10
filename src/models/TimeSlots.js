@@ -14,9 +14,13 @@ const TimeSlotSchema = new mongoose.Schema({
     unique: true
   },
   updatedAt:{
-    type: String, //Epoch Time
+    type: String, 
     required: true,
     default: Date.now()
+  },
+  holidays:{
+    type: Array,
+    default: []
   }
 });
 

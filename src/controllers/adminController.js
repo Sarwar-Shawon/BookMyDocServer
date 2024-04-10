@@ -212,7 +212,7 @@ const registerNewNurse = async (req, res) => {
     //
     // await saveData.populate("dept", { '_id': 1, 'name': 1 });
 
-    await Nurses.populate(updData, [
+    await Nurses.populate(saveData, [
       { path: "dept", select: { _id: 1, name: 1 } },
       { path: "organization", select: { _id: 1, name: 1, addr: 1 } },
     ]);

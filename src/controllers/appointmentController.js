@@ -26,28 +26,37 @@ const createAppointment = async (req, res) => {
     if (!patient && !doctor) {
       return res.status(422).json({ success: false, error: "No data found" });
     }
-    const date1 = new Date(new Date(req.body.apt_date).setHours(0, 0, 0, 0));
-    const date2 = new Date(new Date().setHours(0, 0, 0, 0));
-    const currentTime = new Date();
-    if (date1.getTime() === date2.getTime()) {
-      const [hours, minutes] = req.body.timeslot.split(":");
-      const slotTime = new Date();
-      slotTime.setHours(hours, minutes, 0);
-      if (currentTime > slotTime) {
-        return res
-          .status(422)
-          .json({
-            success: false,
-            error:
-              "You can not make this appointment, cause your selected time slot is not valid ",
-          });
-      }
+    const apt = await Appointments.findOne({
+      pt: patient._id,
+      apt_date: new Date(moment(req.body.apt_date).format("YYYY-MM-DD")),
+      timeslot: req.body.timeslot
+    })
+    if(apt){
+      return res.status(422).json({ success: false, error: "You have already booked an appointment at the same time." });
     }
+    // const date1 = new Date(new Date(req.body.apt_date).setHours(0, 0, 0, 0));
+    // const date2 = new Date(new Date().setHours(0, 0, 0, 0));
+    // const currentTime = new Date();
+    // if (date1.getTime() === date2.getTime()) {
+    //   const [hours, minutes] = req.body.timeslot.split(":");
+    //   const slotTime = new Date();
+    //   slotTime.setHours(hours, minutes, 0);
+    //   if (currentTime > slotTime) {
+    //     return res
+    //       .status(422)
+    //       .json({
+    //         success: false,
+    //         error:
+    //           "You can not make this appointment, cause your selected time slot is not valid ",
+    //       });
+    //   }
+    // }
+    return
     const params = {
       pt: patient._id,
       doc: doctor._id,
       apt_date: new Date(moment(req.body.apt_date).format("YYYY-MM-DD")),
-      status: "Pending",
+      status: "Accepted",
       createdAt: Date.now(),
       dept: req.body.dept,
       org: req.body.org,
