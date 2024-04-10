@@ -215,9 +215,8 @@ const getTimeSlotsByDate = async (req, res) => {
     console.log("day:::", day);
     
     //
-    console.log("timeSlotsAvailabilityData", timeSlotsAvailabilityData);
-    //
     const data = await TimeSlots.findOne({ doctor: doctor._id });
+    //
     if (
       data?.holidays?.length > 0 &&
       checkDateExistInHolidays(data?.holidays, date)
@@ -228,6 +227,7 @@ const getTimeSlotsByDate = async (req, res) => {
         data: {},
       });
     }
+    //
     const timeSlotsAvailabilityData = await Appointments.find({
       doc: doctor._id,
       apt_date: {
@@ -239,6 +239,9 @@ const getTimeSlotsByDate = async (req, res) => {
       .populate("pt")
       .populate("dept", { _id: 1, name: 1 })
       .populate("org", { _id: 1, name: 1, addr: 1 });
+    //
+    console.log("timeSlotsAvailabilityData", timeSlotsAvailabilityData);
+    //
     if (timeSlotsAvailabilityData) {
       timeSlotsAvailabilityData.map((item) => {
         if (data.timeSlots[day] && data.timeSlots[day][item.timeslot]) {
@@ -248,6 +251,7 @@ const getTimeSlotsByDate = async (req, res) => {
         }
       });
     }
+    
 
     let timeSlotsData = data?.timeSlots[day];
     //
