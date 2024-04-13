@@ -23,6 +23,12 @@ import {
   getAppointmentsHistory
 } from "../controllers/appointmentController.js";
 //
+import {
+  getDoctorPrescriptions,
+  createPrescription,
+  getMedicineSuggestions
+} from "../controllers/prescriptionController.js";
+//
 const doctorRouter = express.Router();
 /*
  * Profile
@@ -79,6 +85,15 @@ doctorRouter
 /*
  * Prescriptions
  */
+doctorRouter
+  .route("/get-prescriptions")
+  .get(verifyDoctor, checkAuthRole([roles.Doctor]), getDoctorPrescriptions);
+doctorRouter
+  .route("/create-prescription")
+  .post(verifyDoctor, checkAuthRole([roles.Doctor]), createPrescription);
+doctorRouter
+  .route("/get-medicine-suggestions")
+  .get(verifyDoctor, checkAuthRole([roles.Doctor]), getMedicineSuggestions);
 
 
 //

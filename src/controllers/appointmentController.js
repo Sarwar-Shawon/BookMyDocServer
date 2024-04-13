@@ -289,9 +289,6 @@ const getDoctorAppointments = async (req, res) => {
   try {
     //
     const doctor = req.doctor;
-    if (!doctor) {
-      return res.status(422).json({ success: false, error: "No user found" });
-    }
     //
     const startDay = req.query.startDay
       ? new Date(req.query.startDay)
