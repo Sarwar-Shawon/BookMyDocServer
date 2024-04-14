@@ -6,26 +6,18 @@ import mongoose from "mongoose";
 const medicineSchema = new mongoose.Schema({
   brandName: {
     type: String,
-    trim: true,
-    required: true,
-  },
-  companyName: {
-    type: String,
-    trim: true,
+    trim: true
   },
   genericName: {
     type: String,
     trim: true,
     required: true,
   },
-
-  strength: {
-    type: String,
-    trim: true,
+  dose: {
+    type: Array,
   },
-
   type: {
-    type: String,
+    type: Array,
     trim: true,
   },
 });

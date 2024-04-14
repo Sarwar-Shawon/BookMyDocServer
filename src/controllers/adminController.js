@@ -75,7 +75,7 @@ const registerNewDoctror = async (req, res) => {
       dept: req.body.dept,
       organization: req.body.organization,
       img: imgUrl,
-      nurses: req.body.nurses
+      nurses: req.body.nurses,
     });
     //save to db
     const saveData = await doctor.save();
@@ -140,7 +140,7 @@ const updadteDoctor = async (req, res) => {
     doctor.img = imgUrl;
     doctor.dept = req.body.dept;
     doctor.organization = req.body.organization;
-    doctor.nurses= req.body.nurses
+    doctor.nurses = req.body.nurses;
     //update to db
     const updData = await doctor.save();
     //return response
@@ -167,7 +167,14 @@ const getAllDoctors = async (req, res) => {
         ? Number(req.query.skip)
         : 0;
     const limit = req.query.limit || 15;
-    const doctors = await Doctors.find({})
+    const query = {};
+    if (req.query.dept) {
+      query['dept'] = req.query.dept
+    }
+    if (req.query.org){
+      query['organization'] = req.query.org
+    }
+    const doctors = await Doctors.find(query)
       .populate("dept", { _id: 1, name: 1 })
       .populate("organization", { _id: 1, name: 1, addr: 1 })
       .skip(skip)
@@ -297,9 +304,15 @@ const getAllNurses = async (req, res) => {
       req.query.skip && /^\d+$/.test(req.query.skip)
         ? Number(req.query.skip)
         : 0;
-        const limit = req.query.limit || 15;
-
-    const nurses = await Nurses.find({})
+    const limit = req.query.limit || 15;
+    const query = {};
+    if (req.query.dept) {
+      query['dept'] = req.query.dept
+    }
+    if (req.query.org){
+      query['organization'] = req.query.org
+    }
+    const nurses = await Nurses.find(query)
       .populate("dept", { _id: 1, name: 1 })
       .populate("organization", { _id: 1, name: 1, addr: 1 })
       .skip(skip)
@@ -317,14 +330,11 @@ const getAllNurses = async (req, res) => {
 //get all nurses
 const getAllNursesByDeptAndOrg = async (req, res) => {
   try {
-
     if (!req.query.dept && !req.query.org) {
-      return res
-        .status(500)
-        .json({
-          success: false,
-          error: "please select department and organization",
-        });
+      return res.status(500).json({
+        success: false,
+        error: "please select department and organization",
+      });
     }
     const nurses = await Nurses.find({
       dept: req.query.dept,
@@ -424,12 +434,12 @@ const updadtePharmacy = async (req, res) => {
     const updData = await pharmacy.save();
     //return response
     await Pharmacies.populate(updData, [
-      { path: "org", select: { '_id': 1, 'name': 1 } }
+      { path: "org", select: { _id: 1, name: 1 } },
     ]);
     res.status(200).json({
       success: true,
       message: "You've successfully updated your information.",
-      data: updData
+      data: updData,
     });
   } catch (err) {
     //return err
@@ -443,10 +453,10 @@ const getAllPharmacies = async (req, res) => {
       req.query.skip && /^\d+$/.test(req.query.skip)
         ? Number(req.query.skip)
         : 0;
-        const limit = req.query.limit || 15;
+    const limit = req.query.limit || 15;
 
     const pharmacies = await Pharmacies.find({})
-      .populate("org", { _id: 1, name: 1})
+      .populate("org", { _id: 1, name: 1 })
       .skip(skip)
       .limit(limit);
 
@@ -475,7 +485,6 @@ export {
   registerNewPharmacy,
   updadtePharmacy,
   getAllPharmacies,
-
 };
 
 // Doctors.find({})

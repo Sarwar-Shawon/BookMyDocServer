@@ -28,7 +28,7 @@ const createPrescription = async (req, res) => {
       apt_id: apt_id,
       status: "Created",
       reasons: [],
-      medications: [],
+      medications: req.body.medications,
       tests: [],
       investigations: [],
     };
@@ -346,10 +346,14 @@ const getMedicineSuggestions = async (req, res) => {
   try {
     //
     const medicines = await Medicines.find({
-        $text: {
-          $search: req.query.search_text
-        }
-      });
+        $or: [
+            // { brandName: { $regex: req.query.search_text, $options: "i" } },
+            { genericName: { $regex: req.query.search_text, $options: "i" } }
+          ]
+      }).select(
+        ["brandName","genericName","type","strength"]
+      );
+      console.log("medicines::",medicines)
     //
     res.status(200).json({
       success: true,

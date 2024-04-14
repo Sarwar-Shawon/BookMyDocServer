@@ -25,7 +25,6 @@ const prescriptionsSchema = new mongoose.Schema({
   },
   createdAt:{
     type: Date,
-    default: Date.now,
     required: true
   },
   status: {
@@ -34,14 +33,13 @@ const prescriptionsSchema = new mongoose.Schema({
     enum: ["Created", "Published" , "Delivered"],
     required: true
   },
-  pulished_dt:{
-    type: Date,
-    default: Date.now,
-  },
-  reasons: [],
   medications: [],
-  tests: [],
-  investigations: [],
+  validDt:{
+    type: Date,
+  },
+  // reasons: [],
+  // tests: [],
+  // investigations: [],
 });
 //
 const Prescriptions = mongoose.model("Prescriptions", prescriptionsSchema);
