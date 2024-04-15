@@ -346,14 +346,9 @@ const getMedicineSuggestions = async (req, res) => {
   try {
     //
     const medicines = await Medicines.find({
-        $or: [
-            // { brandName: { $regex: req.query.search_text, $options: "i" } },
-            { genericName: { $regex: req.query.search_text, $options: "i" } }
-          ]
-      }).select(
-        ["brandName","genericName","type","strength"]
-      );
-      console.log("medicines::",medicines)
+      genericName: { $regex: req.query.search_text, $options: "i" },
+    });
+    console.log("medicines::", medicines);
     //
     res.status(200).json({
       success: true,

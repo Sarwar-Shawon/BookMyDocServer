@@ -4,21 +4,16 @@
 import mongoose from "mongoose";
 //
 const medicineSchema = new mongoose.Schema({
-  brandName: {
-    type: String,
-    trim: true
-  },
   genericName: {
     type: String,
     trim: true,
     required: true,
   },
-  dose: {
-    type: Array,
+  strength: {
+    type: Object,
   },
   type: {
     type: Array,
-    trim: true,
   },
 });
 //
