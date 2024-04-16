@@ -51,7 +51,6 @@ const createAppointment = async (req, res) => {
     //       });
     //   }
     // }
-    return
     const params = {
       pt: patient._id,
       doc: doctor._id,
