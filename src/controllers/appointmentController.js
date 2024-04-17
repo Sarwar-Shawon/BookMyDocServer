@@ -122,7 +122,7 @@ const acceptAppointment = async (req, res) => {
     // }
     const apt = await Appointments.findOne({ _id: req.body.apt_id })
       .populate("doc", { _id: 1, f_name: 1, l_name: 1, doc_email: 1 })
-      .populate("pt", { _id: 1, f_name: 1, l_name: 1, pt_email: 1 });
+      .populate("pt", { _id: 1, f_name: 1, l_name: 1, pt_email: 1, dob: 1 });
     console.log("aptapt", apt);
     if (!apt) {
       return res
@@ -178,7 +178,7 @@ const cancelAppointment = async (req, res) => {
     // }
     const apt = await Appointments.findOne({ _id: req.body.apt_id })
       .populate("doc", { _id: 1, f_name: 1, l_name: 1, doc_email: 1 })
-      .populate("pt", { _id: 1, f_name: 1, l_name: 1, pt_email: 1 });
+      .populate("pt", { _id: 1, f_name: 1, l_name: 1, pt_email: 1, dob: 1 });
 
     if (!apt) {
       return res
@@ -238,7 +238,8 @@ const updateAppointment = async (req, res) => {
         l_name: 1,
         doc_email: 1,
         img: 1,
-        nhs: 1,
+        nhs: 1, dob: 1
+        
       });
     console.log("aptapt", apt);
     if (!apt) {
@@ -313,7 +314,7 @@ const getDoctorAppointments = async (req, res) => {
       .populate("dept", { _id: 1, name: 1 })
       .populate("org", { _id: 1, name: 1, addr: 1 })
       .populate("doc", { _id: 1, f_name: 1, l_name: 1, img: 1 })
-      .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1, nhs: 1 })
+      .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1, nhs: 1 , dob: 1})
       .skip(skip)
       .limit(limit);
     // console.log("appointmentsappointments:::", appointments);
@@ -433,7 +434,7 @@ const getPatientAppointments = async (req, res) => {
       .populate("dept", { _id: 1, name: 1 })
       .populate("org", { _id: 1, name: 1, addr: 1 })
       .populate("doc", { _id: 1, f_name: 1, l_name: 1, img: 1, doc_email: 1 })
-      .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1 })
+      .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1, dob: 1 })
       .skip(skip)
       .limit(limit);
     // console.log("appointmentsappointments:::", appointments);

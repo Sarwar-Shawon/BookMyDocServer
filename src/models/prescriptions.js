@@ -4,27 +4,33 @@
 import mongoose from "mongoose";
 //
 const prescriptionsSchema = new mongoose.Schema({
-  pt_id: {
+  pt: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Patients",
     required: true
   },
-  doc_id: {
+  doc: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Doctors",
     required: true
 
   },
-  phar_id: {
+  phar: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Pharmacies"
   },
-  apt_id: {
+  apt: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Appointments"
   },
   createdAt:{
     type: Date,
+    default: Date.now,
+    required: true
+  },
+  updateDt:{
+    type: Date,
+    default: Date.now,
     required: true
   },
   status: {
@@ -37,6 +43,10 @@ const prescriptionsSchema = new mongoose.Schema({
   validDt:{
     type: Date,
   },
+  nshId:{
+    type: String,
+    required: true
+  }
   // reasons: [],
   // tests: [],
   // investigations: [],

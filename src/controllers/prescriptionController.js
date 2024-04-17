@@ -15,47 +15,39 @@ import moment from "moment";
 const createPrescription = async (req, res) => {
   try {
     //
-    const [patient, doctor] = await Promise.all([
-      Patients.findOne({ pt_email: curUser.email }),
-      Doctors.findById(req.body.doc_id),
-    ]);
-    if (!patient && !doctor) {
+    console.log("req.body:::", req.body)
+    const doctor = req.doctor;
+    const apt = await Appointments.findById(req.body.apt_id).populate("pt", { _id :1 , pt_email: 1 , nhs: 1 });
+    if (!apt && !doctor) {
       return res.status(422).json({ success: false, error: "No data found" });
     }
+    //
     const params = {
-      pt_id: patient._id,
-      doc_id: doctor._id,
-      apt_id: apt_id,
+      pt: apt?.pt._id,
+      doc: doctor._id,
+      apt: req.body.apt_id,
+      phr: req.body.phr_id,
       status: "Created",
-      reasons: [],
       medications: req.body.medications,
-      tests: [],
-      investigations: [],
+      validDt: req.body.validDt,
+      nshId: apt?.pt.nhs
     };
     console.log("params:::", params);
     //
     const prescription = new Prescriptions(params);
     await prescription.save();
-    //
-    // if (saveApt._id) {
-    //   await mailSender({
-    //     to: [patient.pt_email, doctor.doc_email],
-    //     subject: "New Appointment",
-    //     body: `<p>A new appointment has created on : <strong>${moment(
-    //       params.apt_date
-    //     ).format("DD-MM-YYYY")}</strong> at: <strong>${
-    //       params.timeslot
-    //     }</strong> .</n>
-    //         Doctor:  <strong>${[doctor.f_name, doctor.l_name].join(
-    //           " "
-    //         )}</strong> .</n>
-    //         Patient:  <strong>${[patient.f_name, patient.l_name].join(
-    //           " "
-    //         )}</strong> .</n>
-    //         Appointment Id:  <strong>${saveApt._id}</strong></n>
-    //       </p>`,
-    //   });
-    // }
+
+    mailSender({
+      to: [apt?.pt?.pt_email, doctor?.doc_email],
+      subject: "Create Appointment",
+      body: `<p>Your <strong>Doctor: </strong> ${[
+        doctor?.f_name,
+        doctor?.l_name,
+      ].join(" ")} has created a prescription for you.</n>
+          <strong> Prescription Id:</strong> ${prescription._id}</n>
+        </p>`,
+    });
+    
     //
     res.status(200).json({
       success: true,
@@ -72,64 +64,36 @@ const createPrescription = async (req, res) => {
 const updatePrescription = async (req, res) => {
   try {
     //
-    const token = getToken(req.headers["authorization"]);
-    const curUser = jwt.decode(token);
-    // const user =
-    //   curUser.roles.toLowerCase() == "patient"
-    //     ? await Patients.findOne({ pt_email: curUser.email })
-    //     : await Doctors.findOne({ doc_email: curUser.email });
-    // if (!user) {
-    //   return res.status(422).json({ success: false, error: "No user found" });
-    // }
-    const apt = await Appointments.findOne({ _id: req.body.apt_id })
-      .populate("dept", { _id: 1, name: 1 })
-      .populate("org", { _id: 1, name: 1, addr: 1 })
-      .populate("doc", { _id: 1, f_name: 1, l_name: 1, doc_email: 1, img: 1 })
-      .populate("pt", {
-        _id: 1,
-        f_name: 1,
-        l_name: 1,
-        doc_email: 1,
-        img: 1,
-        nhs: 1,
-      });
-    console.log("aptapt", apt);
-    if (!apt) {
+    const doctor = req.doctor;
+    if (!doctor) {
+      return res.status(422).json({ success: false, error: "No data found" });
+    }
+    const prescription = await Prescriptions.findById(req.body.pr_id)
+    console.log("prescription", prescription);
+    if (!prescription) {
       return res
         .status(422)
-        .json({ success: false, error: "No appointment found" });
+        .json({ success: false, error: "No prescription found" });
     }
-    if (req.body.apt_date)
-      apt.apt_date = new Date(moment(req.body.apt_date).format("YYYY-MM-DD"));
-    if (req.body.timeslot) apt.timeslot = req.body.timeslot;
-    apt.uniqueId = [
-      req.body.timeslot,
-      moment(req.body.apt_date).format("DD-MM-YYYY"),
-      apt?.doc._id,
-    ].join("");
+    prescription.medications = req.body.medications
+    prescription.validDt = req.body.validDt
+    prescription.updateDt = Date.now
     //
-    await apt.save();
-    await mailSender({
-      to: [apt?.pt?.pt_email, apt?.doc?.doc_email],
-      subject: "Update Appointment",
-      body: `<p>An appointment is updated by ${
-        curUser.roles.toLowerCase() == "patient" ? "Patient" : "Doctor"
-      }, <strong>updated Date : </strong>${moment(apt.apt_date).format(
-        "DD-MM-YYYY"
-      )} <strong>Time:</strong> ${apt.timeslot} .</n>
-      <strong>Doctor: </strong> ${[apt?.doc?.f_name, apt?.doc?.l_name].join(
-        " "
-      )} .</n>
-          <strong> Patient:</strong>  ${[apt?.pt?.f_name, apt?.pt?.l_name].join(
-            " "
-          )}.</n>
-          <strong> Appointment Id:</strong> ${apt._id}</n>
-        </p>`,
-    });
+    await prescription.save();
+    // mailSender({
+    //   to: [apt?.pt?.pt_email, apt?.doc?.doc_email],
+    //   subject: "Create Appointment",
+    //   body: `<p>Your <strong>Doctor: </strong> ${[
+    //     doctor?.f_name,
+    //     doctor?.l_name,
+    //   ].join(" ")} has created a prescription for you.</n>
+    //       <strong> Prescription Id:</strong> ${prescription._id}</n>
+    //     </p>`,
+    // });
     //
     res.status(200).json({
       success: true,
-      data: apt,
+      data: prescription,
     });
   } catch (err) {
     //return err
@@ -157,26 +121,24 @@ const getDoctorPrescriptions = async (req, res) => {
         ? Number(req.query.skip)
         : 0;
     const limit = req.query.limit || 10;
-
-    const _type = req.query.status;
-    const appointments = await Appointments.find({
+    //
+    
+    const prescriptions = await Prescriptions.find({
       doc: doctor._id,
-      apt_date: {
+      createdAt: {
         $gte: startDay,
+        $lte: endDay,
       },
-      status: _type,
     })
-      .populate("dept", { _id: 1, name: 1 })
-      .populate("org", { _id: 1, name: 1, addr: 1 })
       .populate("doc", { _id: 1, f_name: 1, l_name: 1, img: 1 })
-      .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1, nhs: 1 })
+      .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1, nhs: 1 , dob:1 })
       .skip(skip)
       .limit(limit);
     // console.log("appointmentsappointments:::", appointments);
     //
     res.status(200).json({
       success: true,
-      data: appointments,
+      data: prescriptions,
     });
   } catch (err) {
     //return err
