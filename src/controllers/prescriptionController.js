@@ -39,12 +39,13 @@ const createPrescription = async (req, res) => {
 
     mailSender({
       to: [apt?.pt?.pt_email, doctor?.doc_email],
-      subject: "Create Appointment",
+      subject: "New Prescription",
       body: `<p>Your <strong>Doctor: </strong> ${[
         doctor?.f_name,
         doctor?.l_name,
       ].join(" ")} has created a prescription for you.</n>
           <strong> Prescription Id:</strong> ${prescription._id}</n>
+          <strong> Url:</strong> ${prescription._id}</n>
         </p>`,
     });
     
