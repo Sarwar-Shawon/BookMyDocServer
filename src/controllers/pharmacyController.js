@@ -25,3 +25,21 @@ const getProfile = async (req, res) => {
 
   }
 };
+//
+//get all pharmacies
+const getAllPharmaciesForDoctor = async (req, res) => {
+  try {
+    const pharmacies = await Pharmacies.find({org: req.doctor.organization})
+      .populate("org", { _id: 1, name: 1 })
+
+    res.status(200).json({
+      success: true,
+      data: pharmacies,
+    });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+
+export {getAllPharmaciesForDoctor , getProfile}

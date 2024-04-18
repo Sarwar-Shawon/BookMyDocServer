@@ -21,15 +21,16 @@ const createPrescription = async (req, res) => {
     if (!apt && !doctor) {
       return res.status(422).json({ success: false, error: "No data found" });
     }
-    //
+
     const params = {
       pt: apt?.pt._id,
       doc: doctor._id,
       apt: req.body.apt_id,
-      phr: req.body.phr_id,
+      phar: req.body.phr_id,
       status: "Created",
       medications: req.body.medications,
-      validDt: req.body.validDt,
+      // validDt: req.body.validDt,
+      createdAt: new Date(moment().format("YYYY-MM-DD h:mm:ss")),
       nshId: apt?.pt.nhs
     };
     console.log("params:::", params);
@@ -123,7 +124,8 @@ const getDoctorPrescriptions = async (req, res) => {
         : 0;
     const limit = req.query.limit || 10;
     //
-    
+    console.log("startDay", startDay)
+    console.log("endDay", endDay)
     const prescriptions = await Prescriptions.find({
       doc: doctor._id,
       createdAt: {
@@ -131,11 +133,23 @@ const getDoctorPrescriptions = async (req, res) => {
         $lte: endDay,
       },
     })
-      .populate("doc", { _id: 1, f_name: 1, l_name: 1, img: 1 })
+    .populate({
+      path: "doc",
+      select: "_id f_name l_name img organization dept",
+      populate: {
+        path: "organization",
+        model: "Organizations"
+      },
+      populate: [
+        { path: "organization", select: { name: 1, addr: 1 } },
+        { path: "dept", select: {  name: 1 } }
+      ]
+    })
       .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1, nhs: 1 , dob:1 })
+      .populate("phar", { _id: 1, name: 1, addr: 1 , phone: 1})
       .skip(skip)
       .limit(limit);
-    // console.log("appointmentsappointments:::", appointments);
+    console.log("prescriptions:::", prescriptions);
     //
     res.status(200).json({
       success: true,

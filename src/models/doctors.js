@@ -39,7 +39,7 @@ const doctorsSchema = new mongoose.Schema({
     type: Object,
   },
   active: {
-    type: Boolean,
+    type: Boolean,  
     // required: true
   },
   dept: {

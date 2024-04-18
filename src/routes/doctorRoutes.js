@@ -5,6 +5,7 @@ import express from "express";
 import { createTimeSlot,updateTimeSlot , getTimeSlots, getTimeSlotsByDate, getHolidays, updateHolidays } from "../controllers/timeSlotController.js";
 // import { getProfile } from "../controllers/doctorController.js";
 import { getProfile,updateProfile } from "../controllers/profileController.js";
+import { getAllPharmaciesForDoctor } from "../controllers/pharmacyController.js";
 //validator
 import {
   doctorRegisterValidator,
@@ -94,6 +95,9 @@ doctorRouter
 doctorRouter
   .route("/get-medicine-suggestions")
   .get(verifyDoctor, checkAuthRole([roles.Doctor]), getMedicineSuggestions);
+doctorRouter
+  .route("/get-org-pharmacy")
+  .get(verifyDoctor, checkAuthRole([roles.Doctor]), getAllPharmaciesForDoctor);
 
 
 //
