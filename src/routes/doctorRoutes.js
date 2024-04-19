@@ -27,7 +27,8 @@ import {
 import {
   getDoctorPrescriptions,
   createPrescription,
-  getMedicineSuggestions
+  getMedicineSuggestions,
+  createRepeatPrescription
 } from "../controllers/prescriptionController.js";
 //
 const doctorRouter = express.Router();
@@ -92,6 +93,9 @@ doctorRouter
 doctorRouter
   .route("/create-prescription")
   .post(verifyDoctor, checkAuthRole([roles.Doctor]), createPrescription);
+doctorRouter
+  .route("/create-repeat-prescription")
+  .post(verifyDoctor, checkAuthRole([roles.Doctor]), createRepeatPrescription);
 doctorRouter
   .route("/get-medicine-suggestions")
   .get(verifyDoctor, checkAuthRole([roles.Doctor]), getMedicineSuggestions);

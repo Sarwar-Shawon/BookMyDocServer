@@ -27,9 +27,9 @@ const createPrescription = async (req, res) => {
       doc: doctor._id,
       apt: req.body.apt_id,
       phar: req.body.phr_id,
-      status: "Created",
+      status: "New",
       medications: req.body.medications,
-      // validDt: req.body.validDt,
+      validDt: new Date(moment(req.body.validDt).format("YYYY-MM-DD")) ,
       createdAt: new Date(moment().format("YYYY-MM-DD h:mm:ss")),
       nshId: apt?.pt.nhs
     };
@@ -45,6 +45,57 @@ const createPrescription = async (req, res) => {
         doctor?.f_name,
         doctor?.l_name,
       ].join(" ")} has created a prescription for you.</n>
+          <strong> Prescription Id:</strong> ${prescription._id}</n>
+          <strong> Url:</strong> ${prescription._id}</n>
+        </p>`,
+    });
+    
+    //
+    res.status(200).json({
+      success: true,
+      data: prescription,
+      message: "A prescription has created successfully.",
+    });
+  } catch (err) {
+    //return err
+    console.log("err:", err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+//
+const createRepeatPrescription = async (req, res) => {
+  try {
+    //
+    const doctor = req.doctor;
+    const apt = await Appointments.findById(req.body.apt_id).populate("pt", { _id :1 , pt_email: 1 , nhs: 1 });
+    if (!apt && !doctor) {
+      return res.status(422).json({ success: false, error: "No data found" });
+    }
+
+    const params = {
+      pt: apt?.pt._id,
+      doc: doctor._id,
+      apt: req.body.apt_id,
+      phar: req.body.phr_id,
+      status: "Repeated",
+      medications: req.body.medications,
+      validDt: new Date(moment(req.body.validDt).format("YYYY-MM-DD")) ,
+      createdAt: new Date(moment().format("YYYY-MM-DD h:mm:ss")),
+      nshId: apt?.pt.nhs,
+      opid: req.body.opid
+    };
+    console.log("params:::", params);
+    //
+    const prescription = new Prescriptions(params);
+    await prescription.save();
+
+    mailSender({
+      to: [apt?.pt?.pt_email, doctor?.doc_email],
+      subject: "Repeated Prescription",
+      body: `<p>Your <strong>Doctor: </strong> ${[
+        doctor?.f_name,
+        doctor?.l_name,
+      ].join(" ")} has created a repeat prescription for you.</n>
           <strong> Prescription Id:</strong> ${prescription._id}</n>
           <strong> Url:</strong> ${prescription._id}</n>
         </p>`,
@@ -126,13 +177,17 @@ const getDoctorPrescriptions = async (req, res) => {
     //
     console.log("startDay", startDay)
     console.log("endDay", endDay)
-    const prescriptions = await Prescriptions.find({
+    const params = {
       doc: doctor._id,
       createdAt: {
         $gte: startDay,
         $lte: endDay,
       },
-    })
+    }
+    if(req.query.repeated){
+      params.repeatReq = true
+    }
+    const prescriptions = await Prescriptions.find(params)
     .populate({
       path: "doc",
       select: "_id f_name l_name img organization dept",
@@ -351,5 +406,6 @@ export {
   getDoctorPrescriptions,
   getPatientPrescriptions,
   getPharmacyPrescriptions,
-  getMedicineSuggestions
+  getMedicineSuggestions,
+  createRepeatPrescription
 };

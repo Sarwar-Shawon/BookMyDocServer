@@ -35,8 +35,8 @@ const prescriptionsSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    default: "Created",
-    enum: ["Created", "Published" , "Delivered"],
+    default: "New",
+    enum: ["New", "Repeated" , "Dispensed"],
     required: true
   },
   medications: [],
@@ -46,10 +46,23 @@ const prescriptionsSchema = new mongoose.Schema({
   nshId:{
     type: String,
     required: true
-  }
-  // reasons: [],
-  // tests: [],
-  // investigations: [],
+  },
+  payStatus:{
+    type: String,
+    default: "Unpaid",
+    enum: ["Unpaid", "Paid" , "Refund"],
+    required: true
+  },
+  amount:{
+    type: String,
+  },
+  repeatReq:{
+    type: Boolean,
+    default: false
+  },
+  opid:{
+    type: mongoose.Schema.Types.ObjectId
+  },
 });
 //
 const Prescriptions = mongoose.model("Prescriptions", prescriptionsSchema);
