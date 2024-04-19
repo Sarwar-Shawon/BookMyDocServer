@@ -379,8 +379,8 @@ const getAppointmentsHistory = async (req, res) => {
       curUser.roles.toLowerCase() == "nurse"
     )
       params.doc = user._id;
-    if (req.query.status) params.status = req.query.status;
-
+    // if (req.query.status) params.status = req.query.status;
+    console.log("params", params)
     const appointments = await Appointments.find(params)
       .populate("dept", { _id: 1, name: 1 })
       .populate("org")

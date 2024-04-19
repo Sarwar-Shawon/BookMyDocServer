@@ -164,13 +164,10 @@ const getDoctorPrescriptions = async (req, res) => {
 const getPatientPrescriptions = async (req, res) => {
   try {
     //
-    // const token = getToken(req.headers["authorization"]);
-    // const curUser = jwt.decode(token);
-    // const patient = await Patients.findOne({ pt_email: curUser.email });
-    // if (!patient) {
-    //   return res.status(422).json({ success: false, error: "No user found" });
-    // }
     const patient = req.patient;
+    if (!patient) {
+      return res.status(422).json({ success: false, error: "No user found" });
+    }
     //
     const startDay = req.query.startDay
       ? new Date(req.query.startDay)
@@ -184,26 +181,37 @@ const getPatientPrescriptions = async (req, res) => {
         ? Number(req.query.skip)
         : 0;
     const limit = req.query.limit || 10;
-    console.log("startDaystartDaystartDaystartDay:", startDay);
-
-    const appointments = await Appointments.find({
+    //
+    console.log("startDay", startDay)
+    console.log("endDay", endDay)
+    const prescriptions = await Prescriptions.find({
       pt: patient._id,
-      apt_date: {
+      createdAt: {
         $gte: startDay,
+        $lte: endDay,
       },
-      status: req.query.status,
     })
-      .populate("dept", { _id: 1, name: 1 })
-      .populate("org", { _id: 1, name: 1, addr: 1 })
-      .populate("doc", { _id: 1, f_name: 1, l_name: 1, img: 1, doc_email: 1 })
-      .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1 })
+    .populate({
+      path: "doc",
+      select: "_id f_name l_name img organization dept",
+      populate: {
+        path: "organization",
+        model: "Organizations"
+      },
+      populate: [
+        { path: "organization", select: { name: 1, addr: 1 } },
+        { path: "dept", select: {  name: 1 } }
+      ]
+    })
+      .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1, nhs: 1 , dob:1 })
+      .populate("phar", { _id: 1, name: 1, addr: 1 , phone: 1})
       .skip(skip)
       .limit(limit);
-    // console.log("appointmentsappointments:::", appointments);
+    console.log("prescriptions:::", prescriptions);
     //
     res.status(200).json({
       success: true,
-      data: appointments,
+      data: prescriptions,
     });
   } catch (err) {
     //return err
