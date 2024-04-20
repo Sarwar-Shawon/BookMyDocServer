@@ -68,22 +68,26 @@ const createRepeatPrescription = async (req, res) => {
   try {
     //
     const doctor = req.doctor;
-    const apt = await Appointments.findById(req.body.apt_id).populate("pt", { _id :1 , pt_email: 1 , nhs: 1 });
-    if (!apt && !doctor) {
+    const pres = await Prescriptions.findById(req.body.pres_id).populate("pt", { _id :1 , pt_email: 1 , nhs: 1 });
+    if (!pres && !doctor) {
       return res.status(422).json({ success: false, error: "No data found" });
     }
+    pres.repeatReq = false ;
+    await pres.save();
 
     const params = {
-      pt: apt?.pt._id,
+      pt: pres?.pt._id,
       doc: doctor._id,
-      apt: req.body.apt_id,
+      apt: pres.apt,
       phar: req.body.phr_id,
       status: "Repeated",
       medications: req.body.medications,
       validDt: new Date(moment(req.body.validDt).format("YYYY-MM-DD")) ,
       createdAt: new Date(moment().format("YYYY-MM-DD h:mm:ss")),
-      nshId: apt?.pt.nhs,
-      opid: req.body.opid
+      repeatPresDt: new Date(moment().format("YYYY-MM-DD h:mm:ss")),
+      nshId: pres?.pt.nhs,
+      opid: pres._id,
+      repeatOption: req.body.repeatOption
     };
     console.log("params:::", params);
     //
@@ -91,7 +95,7 @@ const createRepeatPrescription = async (req, res) => {
     await prescription.save();
 
     mailSender({
-      to: [apt?.pt?.pt_email, doctor?.doc_email],
+      to: [pres?.pt?.pt_email, doctor?.doc_email],
       subject: "Repeated Prescription",
       body: `<p>Your <strong>Doctor: </strong> ${[
         doctor?.f_name,
@@ -400,6 +404,27 @@ const getMedicineSuggestions = async (req, res) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 };
+//
+const reqRepeatPrescription = async (req,res) => {
+  try{
+    const doctor = req.patient;
+    const pres = await Prescriptions.findById(req.body.pres_id).populate("pt", { _id :1 , pt_email: 1 , nhs: 1 });
+    if (!pres && !doctor) {
+      return res.status(422).json({ success: false, error: "No data found" });
+    }
+    pres.repeatReq = true ;
+    pres.repeatReqDt = new Date(moment().format("YYYY-MM-DD h:mm:ss")) ;
+    //
+    await pres.save();
+    //
+    res.status(200).json({
+      success: true,
+      message: "A request for prescription has created successfully.",
+    });
+  }catch(err){
+
+  }
+}
 export {
   //
   createPrescription,

@@ -66,7 +66,13 @@ const prescriptionsSchema = new mongoose.Schema({
   repeatOption: {
     type: Boolean,
     default: false
-  }
+  },
+  repeatPresDt:{
+    type: Date,
+  },
+  repeatReqDt:{
+    type: Date,
+  },
 
 });
 //
