@@ -31,7 +31,8 @@ const createPrescription = async (req, res) => {
       medications: req.body.medications,
       validDt: new Date(moment(req.body.validDt).format("YYYY-MM-DD")) ,
       createdAt: new Date(moment().format("YYYY-MM-DD h:mm:ss")),
-      nshId: apt?.pt.nhs
+      nshId: apt?.pt.nhs,
+      repeatOption: req.body.repeatOption
     };
     console.log("params:::", params);
     //

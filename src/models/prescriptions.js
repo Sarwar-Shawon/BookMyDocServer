@@ -63,6 +63,11 @@ const prescriptionsSchema = new mongoose.Schema({
   opid:{
     type: mongoose.Schema.Types.ObjectId
   },
+  repeatOption: {
+    type: Boolean,
+    default: false
+  }
+
 });
 //
 const Prescriptions = mongoose.model("Prescriptions", prescriptionsSchema);
