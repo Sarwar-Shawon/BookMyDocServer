@@ -59,12 +59,19 @@ const updateProfile = async (req, res) => {
     let user;
     const params = req.body;
     let imgUrl = "";
-    if (req.file?.filename) {
-      imgUrl = req.file.filename;
+    if (req.files['img']) {
+      imgUrl = req.files['img'][0].filename;
     }
     if(imgUrl)
       params.img = imgUrl
-
+    
+    let pSignUrl = "";
+    if (req.files['pSign']) {
+      pSignUrl = req.files['pSign'][0].filename;
+    }
+    if(pSignUrl)
+      params.pSign = pSignUrl
+    //
     if (curUser.roles.toLowerCase() === "doctor") {
       user = await Doctors.findOneAndUpdate(
         { doc_email: curUser.email },

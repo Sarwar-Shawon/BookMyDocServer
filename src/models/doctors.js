@@ -32,6 +32,9 @@ const doctorsSchema = new mongoose.Schema({
   img: {
     type: String,
   },
+  pSign: {
+    type: String,
+  },
   addr:{
     type: Object,
   },

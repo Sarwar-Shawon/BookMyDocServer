@@ -48,7 +48,7 @@ nurseRouter
   .get(auth, checkAuthRole([roles.Nurse]), getProfile);
 nurseRouter
   .route("/update-profile")
-  .put(auth, checkAuthRole([roles.Nurse]),upload.single("img"), updateProfile);
+  .put(auth, checkAuthRole([roles.Nurse]),upload.fields([{ name: 'img', maxCount: 1 }]), updateProfile);
 
 
 /*

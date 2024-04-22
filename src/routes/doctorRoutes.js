@@ -40,7 +40,7 @@ doctorRouter
   .get(auth, checkAuthRole([roles.Doctor]), getProfile);
 doctorRouter
   .route("/update-profile")
-  .put(auth, checkAuthRole([roles.Doctor]),upload.single("img"), updateProfile);
+  .put(auth, checkAuthRole([roles.Doctor]),upload.fields([{ name: 'img', maxCount: 1 }, { name: 'pSign', maxCount: 1 }]), updateProfile);
 
 /*
  * Holidays

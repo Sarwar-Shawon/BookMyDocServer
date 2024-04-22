@@ -40,7 +40,7 @@ patientRouter
   .put(
     auth,
     checkAuthRole([roles.Patient]),
-    upload.single("img"),
+    upload.fields([{ name: 'img', maxCount: 1 }]),
     updateProfile
   );
 /*
