@@ -21,7 +21,7 @@ const createPrescription = async (req, res) => {
     if (!apt && !doctor) {
       return res.status(422).json({ success: false, error: "No data found" });
     }
-
+    //
     const params = {
       pt: apt?.pt._id,
       doc: doctor._id,
@@ -32,13 +32,14 @@ const createPrescription = async (req, res) => {
       validDt: new Date(moment(req.body.validDt).format("YYYY-MM-DD")) ,
       createdAt: new Date(moment().format("YYYY-MM-DD h:mm:ss")),
       nshId: apt?.pt.nhs,
-      repeatOption: req.body.repeatOption
+      repeatOption: req.body.repeatOption,
+      presType: "New"
     };
     console.log("params:::", params);
     //
     const prescription = new Prescriptions(params);
     await prescription.save();
-
+    //
     mailSender({
       to: [apt?.pt?.pt_email, doctor?.doc_email],
       subject: "New Prescription",
@@ -47,10 +48,9 @@ const createPrescription = async (req, res) => {
         doctor?.l_name,
       ].join(" ")} has created a prescription for you.</n>
           <strong> Prescription Id:</strong> ${prescription._id}</n>
-          <strong> Url:</strong> ${prescription._id}</n>
+          <strong> Url:</strong> ${process.env.CLIENT_APP_URL}/prescriptions</n>
         </p>`,
     });
-    
     //
     res.status(200).json({
       success: true,
@@ -74,7 +74,7 @@ const createRepeatPrescription = async (req, res) => {
     }
     pres.repeatReq = false ;
     await pres.save();
-
+    //
     const params = {
       pt: pres?.pt._id,
       doc: doctor._id,
@@ -87,7 +87,8 @@ const createRepeatPrescription = async (req, res) => {
       repeatPresDt: new Date(moment().format("YYYY-MM-DD h:mm:ss")),
       nshId: pres?.pt.nhs,
       opid: pres._id,
-      repeatOption: req.body.repeatOption
+      repeatOption: req.body.repeatOption,
+      presType: "Repeated"
     };
     console.log("params:::", params);
     //
@@ -102,7 +103,7 @@ const createRepeatPrescription = async (req, res) => {
         doctor?.l_name,
       ].join(" ")} has created a repeat prescription for you.</n>
           <strong> Prescription Id:</strong> ${prescription._id}</n>
-          <strong> Url:</strong> ${prescription._id}</n>
+          <strong> Url:</strong> ${process.env.CLIENT_APP_URL}/prescriptions</n>
         </p>`,
     });
     
@@ -195,7 +196,7 @@ const getDoctorPrescriptions = async (req, res) => {
     const prescriptions = await Prescriptions.find(params)
     .populate({
       path: "doc",
-      select: "_id f_name l_name img organization dept",
+      select: "_id f_name l_name img organization dept pSign",
       populate: {
         path: "organization",
         model: "Organizations"
@@ -253,7 +254,7 @@ const getPatientPrescriptions = async (req, res) => {
     })
     .populate({
       path: "doc",
-      select: "_id f_name l_name img organization dept",
+      select: "_id f_name l_name img organization dept pSign",
       populate: {
         path: "organization",
         model: "Organizations"
@@ -275,64 +276,6 @@ const getPatientPrescriptions = async (req, res) => {
     });
   } catch (err) {
     //return err
-    return res.status(500).json({ success: false, error: err.message });
-  }
-};
-//
-//
-const sharePrescription = async (req, res) => {
-  try {
-    //
-    const [patient, doctor] = await Promise.all([
-      Patients.findOne({ pt_email: curUser.email }),
-      Doctors.findById(req.body.doc_id),
-    ]);
-    if (!patient && !doctor) {
-      return res.status(422).json({ success: false, error: "No data found" });
-    }
-    const params = {
-      pt_id: patient._id,
-      doc_id: doctor._id,
-      apt_id: apt_id,
-      status: "Created",
-      reasons: [],
-      medications: [],
-      tests: [],
-      investigations: [],
-    };
-    console.log("params:::", params);
-    //
-    const prescription = new Prescriptions(params);
-    await prescription.save();
-    //
-    // if (saveApt._id) {
-    //   await mailSender({
-    //     to: [patient.pt_email, doctor.doc_email],
-    //     subject: "New Appointment",
-    //     body: `<p>A new appointment has created on : <strong>${moment(
-    //       params.apt_date
-    //     ).format("DD-MM-YYYY")}</strong> at: <strong>${
-    //       params.timeslot
-    //     }</strong> .</n>
-    //         Doctor:  <strong>${[doctor.f_name, doctor.l_name].join(
-    //           " "
-    //         )}</strong> .</n>
-    //         Patient:  <strong>${[patient.f_name, patient.l_name].join(
-    //           " "
-    //         )}</strong> .</n>
-    //         Appointment Id:  <strong>${saveApt._id}</strong></n>
-    //       </p>`,
-    //   });
-    // }
-    //
-    res.status(200).json({
-      success: true,
-      data: prescription,
-      message: "A prescription has created successfully.",
-    });
-  } catch (err) {
-    //return err
-    console.log("err:", err);
     return res.status(500).json({ success: false, error: err.message });
   }
 };
@@ -387,6 +330,72 @@ const getPharmacyPrescriptions = async (req, res) => {
   }
 };
 //
+const reqRepeatPrescription = async (req,res) => {
+  try{
+    const patient = req.patient;
+    const pres = await Prescriptions.findById(req.body.pres_id).populate(
+      "doc",
+      { doc_email: 1, f_name: 1, l_name: 1 }
+    ).populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1, nhs: 1 , dob:1 });
+    if (!pres && !patient) {
+      return res.status(422).json({ success: false, error: "No data found" });
+    }
+    if(pres.repeatReq ){
+      return res.status(422).json({ success: false, error: "You have already requested for a repeat prescription."});
+    }
+    pres.repeatReq = true;
+    pres.repeatReqDt = new Date(moment().format("YYYY-MM-DD h:mm:ss"));
+    //
+    await pres.save();
+    //send email
+    // mailSender({
+    //   to: [pres?.doc?.doc_email, patient.pt_email],
+    //   subject: "Request for Repeat Prescription",
+    //   body: `<p>A <strong>Patient: </strong> ${[
+    //     patient.f_name,
+    //     patient.l_name,
+    //   ].join(" ")} has requested for a repeat prescription.</n>
+    //       <strong>Old Prescription Id:</strong> ${pres._id}</n>
+    //       <strong>Nhs Id:</strong> ${patient.nhs}</n>
+    //       <strong> Url:</strong> ${process.env.CLIENT_APP_URL}/prescriptions</n>
+    //     </p>`,
+    // });
+
+    // Email body for the doctor
+    const doctorEmailBody = `<p>A patient, ${patient.f_name} ${patient.l_name}, has requested for a repeat prescription.</br>
+                            <strong>Old Prescription Id:</strong> ${pres._id}</br>
+                            <strong>Nhs Id:</strong> ${patient.nhs}</br>
+                            <strong>Url:</strong> ${process.env.CLIENT_APP_URL}/prescriptions</p>`;
+
+    // Email body for the patient
+    const patientEmailBody = `<p>You have requested a repeat prescription.</br>
+                            <strong>Old Prescription Id:</strong> ${pres._id}</br>
+                            <strong>Nhs Id:</strong> ${patient.nhs}</br>
+                            <strong>Url:</strong> ${process.env.CLIENT_APP_URL}/prescriptions</p>`;
+
+    // Send email to the doctor
+    mailSender({
+      to: pres?.doc?.doc_email,
+      subject: "Request for Repeat Prescription",
+      body: doctorEmailBody,
+    });
+
+    // Send email to the patient
+    mailSender({
+      to: patient.pt_email,
+      subject: "Repeat Prescription Request Confirmation",
+      body: patientEmailBody,
+    });
+    res.status(200).json({
+      success: true,
+      message: "A request for prescription has created successfully.",
+      data: pres
+    });
+  }catch(err){
+    return res.status(500).json({ success: false, error: err.message });
+  }
+}
+//
 const getMedicineSuggestions = async (req, res) => {
   try {
     //
@@ -404,27 +413,6 @@ const getMedicineSuggestions = async (req, res) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 };
-//
-const reqRepeatPrescription = async (req,res) => {
-  try{
-    const doctor = req.patient;
-    const pres = await Prescriptions.findById(req.body.pres_id).populate("pt", { _id :1 , pt_email: 1 , nhs: 1 });
-    if (!pres && !doctor) {
-      return res.status(422).json({ success: false, error: "No data found" });
-    }
-    pres.repeatReq = true ;
-    pres.repeatReqDt = new Date(moment().format("YYYY-MM-DD h:mm:ss")) ;
-    //
-    await pres.save();
-    //
-    res.status(200).json({
-      success: true,
-      message: "A request for prescription has created successfully.",
-    });
-  }catch(err){
-
-  }
-}
 export {
   //
   createPrescription,
@@ -433,5 +421,6 @@ export {
   getPatientPrescriptions,
   getPharmacyPrescriptions,
   getMedicineSuggestions,
-  createRepeatPrescription
+  createRepeatPrescription,
+  reqRepeatPrescription
 };

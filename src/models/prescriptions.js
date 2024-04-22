@@ -36,7 +36,7 @@ const prescriptionsSchema = new mongoose.Schema({
   status: {
     type: String,
     default: "New",
-    enum: ["New", "Repeated" , "Dispensed"],
+    enum: ["New","Ready", "Dispensed"],
     required: true
   },
   medications: [],
@@ -73,6 +73,14 @@ const prescriptionsSchema = new mongoose.Schema({
   repeatReqDt:{
     type: Date,
   },
+  dispensedReqDt:{
+    type: Date,
+  },
+  presType:{
+    type: String,
+    enum: ["New", "Repeated"],
+    required: true
+  }
 
 });
 //

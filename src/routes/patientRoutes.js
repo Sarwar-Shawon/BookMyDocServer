@@ -16,16 +16,14 @@ import {
   cancelAppointment,
   getAppointmentsHistory,
 } from "../controllers/appointmentController.js";
-import {
-  doctorRegisterValidator,
-  nurseRegisterValidator,
-} from "../Validator/adminControllerValidator.js";
+
 //authurization check
 import { auth, checkAuthRole, verifyPatient } from "../middleware/auth.js";
 import roles from "../helpers/roles.js";
 import { upload } from "../utils/uploadImage.js";
 import {
   getPatientPrescriptions,
+  reqRepeatPrescription
 } from "../controllers/prescriptionController.js";
 //
 const patientRouter = express.Router();
@@ -88,8 +86,9 @@ patientRouter
 patientRouter
   .route("/get-prescriptions")
   .get(verifyPatient, checkAuthRole([roles.Patient]), getPatientPrescriptions);
-// patientRouter
-//   .route("/request-prescription")
-//   .post(verifyPatient, checkAuthRole([roles.Patient]), createPrescription);
+
+patientRouter
+  .route("/request-prescription")
+  .post(verifyPatient, checkAuthRole([roles.Patient]), reqRepeatPrescription);
 //
 export default patientRouter;
