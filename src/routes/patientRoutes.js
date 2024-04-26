@@ -5,10 +5,9 @@ import express from "express";
 import { getProfile, updateProfile } from "../controllers/profileController.js";
 import {
   getDepartments,
-  getDoctorsByDepartment,
 } from "../controllers/departmentController.js";
 import { getTimeSlotsForPatient } from "../controllers/timeSlotController.js";
-import { getDoctors } from "../controllers/patientController.js";
+import { getDoctors,getDoctorsByDepartment } from "../controllers/patientController.js";
 import {
   createAppointment,
   getPatientAppointments,

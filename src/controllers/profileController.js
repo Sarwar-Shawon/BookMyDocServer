@@ -33,7 +33,7 @@ const getProfile = async (req, res) => {
         .populate("organization", { _id: 1, name: 1, addr: 1 });
     }
     else if(curUser.roles.toLowerCase() == "pharmacy"){
-        user =  await Pharmacy.findOne({ phr_email: curUser.email });
+        user =  await Pharmacy.findOne({ phar_email: curUser.email }).populate("org", { _id: 1, name: 1 });
 
     }else{
       return res.status(422).json({ success: false, error: "user not found" });
@@ -92,7 +92,7 @@ const updateProfile = async (req, res) => {
       );
     } else if (curUser.roles.toLowerCase() === "pharmacy") {
       user = await Pharmacy.findOneAndUpdate(
-        { phr_email: curUser.email },
+        { phar_email: curUser.email },
         params,
         { new: true }
       );

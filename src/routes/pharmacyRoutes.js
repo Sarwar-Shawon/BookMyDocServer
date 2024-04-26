@@ -2,39 +2,37 @@
  * @copyRight by md sarwar hoshen.
  */
 import express from "express";
-import { createTimeSlot,updateTimeSlot , getTimeSlots } from "../controllers/timeSlotController.js";
-import { getProfile } from "../controllers/doctorController.js";
+import { getProfile, updateProfile } from "../controllers/profileController.js";
 import {
-    getDepartments,
-  } from "../controllers/departmentController.js";
-//validator
-import {
-  doctorRegisterValidator,
-  nurseRegisterValidator,
-} from "../Validator/adminControllerValidator.js";
-//authurization check
+  getPharmacyPrescriptions,
+  updatePrescription,
+} from "../controllers/prescriptionController.js";
 import { auth, checkAuthRole } from "../middleware/auth.js";
 import roles from "../helpers/roles.js";
 import { upload } from "../utils/uploadImage.js";
-//
 const pharmacyRouter = express.Router();
-//
+/*
+ * Profile
+ */
 pharmacyRouter
   .route("/get-profile")
-  .get(auth, checkAuthRole([roles.Doctor]), getProfile);
-
-//timetable
+  .get(auth, checkAuthRole([roles.Pharmacy]), getProfile);
 pharmacyRouter
-  .route("/create-time-slots")
-  .post(auth, checkAuthRole([roles.Doctor]), createTimeSlot);
+  .route("/update-profile")
+  .put(
+    auth,
+    checkAuthRole([roles.Pharmacy]),
+    upload.fields([{ name: "img", maxCount: 1 }]),
+    updateProfile
+  );
+/*
+ * Prescriptions
+ */
 pharmacyRouter
-  .route("/update-time-slots")
-  .post(auth, checkAuthRole([roles.Doctor]), updateTimeSlot);
+  .route("/get-prescriptions")
+  .get(auth, checkAuthRole([roles.Pharmacy]), getPharmacyPrescriptions);
 pharmacyRouter
-  .route("/get-time-slots")
-  .get(auth, checkAuthRole([roles.Doctor]), getTimeSlots);
-pharmacyRouter
-  .route("/getAllDepartments")
-  .get(auth , checkAuthRole([roles.Patient]) , getDepartments);
+  .route("/update-prescription")
+  .post(auth, checkAuthRole([roles.Pharmacy]), updatePrescription);
 //
 export default pharmacyRouter;

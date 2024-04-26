@@ -1,8 +1,6 @@
 /*
  * @copyRight by md sarwar hoshen.
  */
-import Doctors from "../models/doctors.js";
-import Patients from "../models/patients.js";
 import Medicines from "../models/medicines.js";
 import Appointments from "../models/appointments.js";
 import Pharmacies from "../models/pharmacies.js";
@@ -72,15 +70,13 @@ const createRepeatPrescription = async (req, res) => {
     if (!pres && !doctor) {
       return res.status(422).json({ success: false, error: "No data found" });
     }
-    pres.repeatReq = false ;
-    await pres.save();
     //
     const params = {
       pt: pres?.pt._id,
       doc: doctor._id,
       apt: pres.apt,
       phar: req.body.phr_id,
-      status: "Repeated",
+      status: "New",
       medications: req.body.medications,
       validDt: new Date(moment(req.body.validDt).format("YYYY-MM-DD")) ,
       createdAt: new Date(moment().format("YYYY-MM-DD h:mm:ss")),
@@ -94,7 +90,9 @@ const createRepeatPrescription = async (req, res) => {
     //
     const prescription = new Prescriptions(params);
     await prescription.save();
-
+    pres.repeatReq = false ;
+    pres.rpid = prescription._id;
+    await pres.save();
     mailSender({
       to: [pres?.pt?.pt_email, doctor?.doc_email],
       subject: "Repeated Prescription",
@@ -283,47 +281,57 @@ const getPatientPrescriptions = async (req, res) => {
 const getPharmacyPrescriptions = async (req, res) => {
   try {
     //
-    // const token = getToken(req.headers["authorization"]);
-    // const curUser = jwt.decode(token);
-    // const patient = await Patients.findOne({ pt_email: curUser.email });
-    // if (!patient) {
-    //   return res.status(422).json({ success: false, error: "No user found" });
-    // }
-    const patient = req.patient;
-    //
-    const startDay = req.query.startDay
-      ? new Date(req.query.startDay)
-      : new Date();
-    startDay.setUTCHours(0, 0, 0, 0);
-    const endDay = req.query.endDay ? new Date(req.query.endDay) : new Date();
-    endDay.setUTCHours(23, 59, 59, 999);
-    //
-    const skip =
-      req.query.skip && /^\d+$/.test(req.query.skip)
-        ? Number(req.query.skip)
-        : 0;
-    const limit = req.query.limit || 10;
-    console.log("startDaystartDaystartDaystartDay:", startDay);
-
-    const appointments = await Appointments.find({
-      pt: patient._id,
-      apt_date: {
-        $gte: startDay,
-      },
-      status: req.query.status,
-    })
-      .populate("dept", { _id: 1, name: 1 })
-      .populate("org", { _id: 1, name: 1, addr: 1 })
-      .populate("doc", { _id: 1, f_name: 1, l_name: 1, img: 1, doc_email: 1 })
-      .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1 })
-      .skip(skip)
-      .limit(limit);
-    // console.log("appointmentsappointments:::", appointments);
-    //
-    res.status(200).json({
-      success: true,
-      data: appointments,
-    });
+    const token = getToken(req.headers["authorization"]);
+    const curUser = jwt.decode(token);
+    const pharmacy = await Pharmacies.findOne({ phar_email: curUser.email });
+    if (!pharmacy) {
+      return res.status(422).json({ success: false, error: "No user found" });
+    }
+     //
+     const startDay = req.query.startDay
+     ? new Date(req.query.startDay)
+     : new Date();
+   startDay.setUTCHours(0, 0, 0, 0);
+   const endDay = req.query.endDay ? new Date(req.query.endDay) : new Date();
+   endDay.setUTCHours(23, 59, 59, 999);
+   //
+   const skip =
+     req.query.skip && /^\d+$/.test(req.query.skip)
+       ? Number(req.query.skip)
+       : 0;
+   const limit = req.query.limit || 10;
+   //
+   console.log("startDay", startDay)
+   console.log("endDay", endDay)
+   const prescriptions = await Prescriptions.find({
+     phar: pharmacy._id,
+     createdAt: {
+       $gte: startDay,
+       $lte: endDay,
+     },
+   })
+     .populate({
+       path: "doc",
+       select: "_id f_name l_name img organization dept pSign",
+       populate: {
+         path: "organization",
+         model: "Organizations",
+       },
+       populate: [
+         { path: "organization", select: { name: 1, addr: 1 } },
+         { path: "dept", select: { name: 1 } },
+       ],
+     })
+     .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1, nhs: 1, dob: 1 })
+     .populate("phar", { _id: 1, name: 1, addr: 1, phone: 1 })
+     .skip(skip)
+     .limit(limit);
+   console.log("prescriptions:::", prescriptions);
+   //
+   res.status(200).json({
+     success: true,
+     data: prescriptions,
+   });
   } catch (err) {
     //return err
     return res.status(500).json({ success: false, error: err.message });

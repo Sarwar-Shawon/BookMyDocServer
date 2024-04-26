@@ -50,7 +50,7 @@ const prescriptionsSchema = new mongoose.Schema({
   payStatus:{
     type: String,
     default: "Unpaid",
-    enum: ["Unpaid", "Paid" , "Refund"],
+    enum: ["Unpaid", "Paid"],
     required: true
   },
   amount:{
@@ -80,7 +80,10 @@ const prescriptionsSchema = new mongoose.Schema({
     type: String,
     enum: ["New", "Repeated"],
     required: true
-  }
+  },
+  rpid:{
+    type: mongoose.Schema.Types.ObjectId
+  },
 
 });
 //
