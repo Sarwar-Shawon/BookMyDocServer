@@ -38,7 +38,7 @@ const patientsSchema = new mongoose.Schema({
   addr:{
     type: Object,
   },
-  details: {
+  medical_history: {
     type: Object,
   },
 });

@@ -34,6 +34,7 @@ const getDoctors = async (req, res) => {
     const doctors = await Doctors.find(query)
       .populate("dept", { _id: 1, name: 1 })
       .populate("organization", { _id: 1, name: 1, addr: 1 })
+      .select({ f_name: 1, l_name: 1, dept: 1, organization: 1, img: 1, _id: 1, doc_email: 1 })
       .skip(skip)
       .limit(limit);
     //
@@ -79,6 +80,7 @@ const getDoctorsByDepartment = async (req, res) => {
     const doctors = await Doctors.find(query)
       .populate("dept", { _id: 1, name: 1 })
       .populate("organization", { _id: 1, name: 1, addr: 1 })
+      .select({ f_name: 1, l_name: 1, dept: 1, organization: 1, img: 1, _id: 1 , doc_email: 1 })
       .skip(skip)
       .limit(limit);
 
