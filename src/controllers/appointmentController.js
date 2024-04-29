@@ -65,6 +65,7 @@ const createAppointment = async (req, res) => {
         moment(req.body.apt_date).format("DD-MM-YYYY"),
         doctor._id,
       ].join(""),
+      notes: req.body.notes
     };
     console.log("params:::", params);
     //
@@ -314,7 +315,7 @@ const getDoctorAppointments = async (req, res) => {
       .populate("dept", { _id: 1, name: 1 })
       .populate("org", { _id: 1, name: 1, addr: 1 })
       .populate("doc", { _id: 1, f_name: 1, l_name: 1, img: 1, pSign: 1 })
-      .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1, nhs: 1 , dob: 1})
+      .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1, nhs: 1 , dob: 1 , medical_history: 1})
       .skip(skip)
       .limit(limit);
     // console.log("appointmentsappointments:::", appointments);

@@ -50,6 +50,9 @@ const appointmentsSchema = new mongoose.Schema({
   },
   docInfo:{
 
+  },
+  notes: {
+    type: String,
   }
 
 });

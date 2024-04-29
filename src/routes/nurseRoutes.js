@@ -18,6 +18,7 @@ import {
   updateProfile
 } from "../controllers/profileController.js";
 import { getDepartments } from "../controllers/departmentController.js";
+import { updatePatientHealthRecord } from "../controllers/patientController.js";
 import {
   getDoctorAppointments,
   updateAppointment,
@@ -25,11 +26,6 @@ import {
   cancelAppointment,
   getAppointmentsHistory,
 } from "../controllers/appointmentController.js";
-//validator
-import {
-  doctorRegisterValidator,
-  nurseRegisterValidator,
-} from "../Validator/adminControllerValidator.js";
 //authurization check
 import {
   auth,
@@ -115,5 +111,11 @@ nurseRouter
     checkAuthRole([roles.Nurse]),
     getAppointmentsHistory
   );
-
+/*
+ * PatietnRecord Update
+ */
+nurseRouter
+  .route("/update-patient-record")
+  .put(auth, checkAuthRole([roles.Nurse]), updatePatientHealthRecord);
+  
 export default nurseRouter;

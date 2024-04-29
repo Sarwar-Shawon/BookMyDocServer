@@ -3,7 +3,9 @@
  */
 import Doctors from "../models/doctors.js";
 import Organizations from "../models/organization.js";
-
+import Patients from "../models/patients.js";
+import jwt from "jsonwebtoken";
+import {getToken} from "../utils/getToken.js";
 //get all doctors
 const getDoctors = async (req, res) => {
   try {
@@ -94,8 +96,33 @@ const getDoctorsByDepartment = async (req, res) => {
   }
 };
 //
+const updatePatientHealthRecord = async (req, res) => {
+  try {
+    const token = getToken(req.headers["authorization"]);
+    const curUser = jwt.decode(token);
+    if (!curUser) {
+      return res.status(422).json({ success: false, error: "user not found" });
+    }
+    //
+    const patient = await Patients.findById(req.body.pt_id);
+    console.log("patient",patient)
+    patient.medical_history = req.body.medical_history;
+    patient.save()
+    //
+    res.status(200).json({
+      success: true,
+      data: patient,
+      message: "Patient record has been updated successfully"
+    });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+//
 export {
   //
   getDoctors,
-  getDoctorsByDepartment
+  getDoctorsByDepartment,
+  updatePatientHealthRecord
 };

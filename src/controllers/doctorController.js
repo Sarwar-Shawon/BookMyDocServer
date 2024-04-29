@@ -4,7 +4,6 @@
 import Doctors from "../models/doctors.js";
 import jwt from "jsonwebtoken";
 import {getToken} from "../utils/getToken.js";
-import Patients from "../models/patient.js";
 //
 const getProfile = async (req, res) => {
   try {
@@ -28,18 +27,6 @@ const getProfile = async (req, res) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 };
-//
-const updatePatientHealthRecord = async (req, res) => {
-  try {
-    //
-    res.status(200).json({
-      success: true,
-      data: [],
-    });
-  } catch (err) {
-    //return err
-    return res.status(500).json({ success: false, error: err.message });
-  }
-};
+
 //
 export { getProfile };
