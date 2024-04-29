@@ -111,7 +111,7 @@ const updatePatientHealthRecord = async (req, res) => {
     //
     res.status(200).json({
       success: true,
-      data: patient,
+      data: patient.medical_history,
       message: "Patient record has been updated successfully"
     });
   } catch (err) {
