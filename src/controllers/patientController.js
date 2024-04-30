@@ -18,21 +18,25 @@ const getDoctors = async (req, res) => {
     const query = {
       active: true
     }
-    if(req.query.lat && req.query.lng){
+    const lat = Number(req.query.lat);
+    const lng = Number(req.query.lng);
+
+    if(!isNaN(lat) && !isNaN(lng)){
       query.organization = {
         $in: await Organizations.find({
           "addr.lat_lng": {
             $near: {
               $geometry: {
                 type: "Point",
-                coordinates: [req.query.lat,req.query.lng],
+                coordinates: [lat, lng],
               },
-              $maxDistance: 21 * 1609.34,
+              $maxDistance: (req.query.range ? Number(req.query.range) : 5) * 1609.34,
             },
           },
         }).distinct("_id"),
       }
     }
+    //
     const doctors = await Doctors.find(query)
       .populate("dept", { _id: 1, name: 1 })
       .populate("organization", { _id: 1, name: 1, addr: 1 })
@@ -40,6 +44,7 @@ const getDoctors = async (req, res) => {
       .skip(skip)
       .limit(limit);
     //
+    console.log("doctorsdoctorsdoctorsdoctorsdoctors:",doctors)
     res.status(200).json({
       success: true,
       data: doctors,
@@ -64,16 +69,18 @@ const getDoctorsByDepartment = async (req, res) => {
       dept: req.query.dept,
       active: true,
     };
-    if (req.query.lat && req.query.lng) {
+    const lat = Number(req.query.lat);
+    const lng = Number(req.query.lng);
+    if(!isNaN(lat) && !isNaN(lng)){
       query.organization = {
         $in: await Organizations.find({
           "addr.lat_lng": {
             $near: {
               $geometry: {
                 type: "Point",
-                coordinates: [req.query.lat, req.query.lng],
+                coordinates: [lat, lng],
               },
-              $maxDistance: 21 * 1609.34,
+              $maxDistance: (req.query.range ? Number(req.query.range) : 5) * 1609.34,
             },
           },
         }).distinct("_id"),

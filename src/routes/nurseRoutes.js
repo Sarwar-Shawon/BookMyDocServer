@@ -116,6 +116,6 @@ nurseRouter
  */
 nurseRouter
   .route("/update-patient-record")
-  .put(auth, checkAuthRole([roles.Nurse]), updatePatientHealthRecord);
+  .put(auth, checkAuthRole([roles.Nurse, roles.Doctor]), updatePatientHealthRecord);
   
 export default nurseRouter;

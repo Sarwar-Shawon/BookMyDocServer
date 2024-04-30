@@ -29,10 +29,13 @@ const createAppointment = async (req, res) => {
     const apt = await Appointments.findOne({
       pt: patient._id,
       apt_date: new Date(moment(req.body.apt_date).format("YYYY-MM-DD")),
-      timeslot: req.body.timeslot
-    })
-    if(apt){
-      return res.status(422).json({ success: false, error: "You have already booked an appointment at the same time." });
+      timeslot: req.body.timeslot,
+    });
+    if (apt) {
+      return res.status(422).json({
+        success: false,
+        error: "You have already booked an appointment at the same time.",
+      });
     }
     // const date1 = new Date(new Date(req.body.apt_date).setHours(0, 0, 0, 0));
     // const date2 = new Date(new Date().setHours(0, 0, 0, 0));
@@ -65,7 +68,7 @@ const createAppointment = async (req, res) => {
         moment(req.body.apt_date).format("DD-MM-YYYY"),
         doctor._id,
       ].join(""),
-      notes: req.body.notes
+      notes: req.body.notes,
     };
     console.log("params:::", params);
     //
@@ -239,8 +242,8 @@ const updateAppointment = async (req, res) => {
         l_name: 1,
         doc_email: 1,
         img: 1,
-        nhs: 1, dob: 1
-        
+        nhs: 1,
+        dob: 1,
       });
     console.log("aptapt", apt);
     if (!apt) {
@@ -315,7 +318,15 @@ const getDoctorAppointments = async (req, res) => {
       .populate("dept", { _id: 1, name: 1 })
       .populate("org", { _id: 1, name: 1, addr: 1 })
       .populate("doc", { _id: 1, f_name: 1, l_name: 1, img: 1, pSign: 1 })
-      .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1, nhs: 1 , dob: 1 , medical_history: 1})
+      .populate("pt", {
+        _id: 1,
+        f_name: 1,
+        l_name: 1,
+        img: 1,
+        nhs: 1,
+        dob: 1,
+        medical_history: 1,
+      })
       .skip(skip)
       .limit(limit);
     // console.log("appointmentsappointments:::", appointments);
@@ -381,7 +392,7 @@ const getAppointmentsHistory = async (req, res) => {
     )
       params.doc = user._id;
     // if (req.query.status) params.status = req.query.status;
-    console.log("params", params)
+    console.log("params", params);
     const appointments = await Appointments.find(params)
       .populate("dept", { _id: 1, name: 1 })
       .populate("org")
@@ -435,7 +446,15 @@ const getPatientAppointments = async (req, res) => {
       .populate("dept", { _id: 1, name: 1 })
       .populate("org", { _id: 1, name: 1, addr: 1 })
       .populate("doc", { _id: 1, f_name: 1, l_name: 1, img: 1, doc_email: 1 })
-      .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1, dob: 1, nhs: 1 })
+      .populate("pt", {
+        _id: 1,
+        f_name: 1,
+        l_name: 1,
+        img: 1,
+        dob: 1,
+        nhs: 1,
+        medical_history: 1,
+      })
       .skip(skip)
       .limit(limit);
     // console.log("appointmentsappointments:::", appointments);
@@ -450,12 +469,27 @@ const getPatientAppointments = async (req, res) => {
   }
 };
 //
-const getSingleAppointment = async (req, res) => {
+const getAppointmentDetails = async (req, res) => {
   try {
     //
-    const apt = await Appointments.findOne({ _id: req.body.apt_id })
-      .populate("doc")
-      .populate("pt");
+    const token = getToken(req.headers["authorization"]);
+    const curUser = jwt.decode(token);
+    if (!curUser) {
+      return res.status(422).json({ success: false, error: "user not found" });
+    }
+    const apt = await Appointments.findById(req.query.apt_id)
+      .populate("dept", { _id: 1, name: 1 })
+      .populate("org", { _id: 1, name: 1, addr: 1 })
+      .populate("doc", { _id: 1, f_name: 1, l_name: 1, img: 1, pSign: 1 })
+      .populate("pt", {
+        _id: 1,
+        f_name: 1,
+        l_name: 1,
+        img: 1,
+        nhs: 1,
+        dob: 1,
+        medical_history: 1,
+      });
     if (!apt) {
       return res
         .status(422)
@@ -480,5 +514,5 @@ export {
   updateAppointment,
   cancelAppointment,
   getAppointmentsHistory,
-  getSingleAppointment
+  getAppointmentDetails,
 };
