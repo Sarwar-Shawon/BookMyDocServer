@@ -5,7 +5,8 @@ import express from "express";
 import { getProfile, updateProfile } from "../controllers/profileController.js";
 import {
   getPharmacyPrescriptions,
-  updatePrescription,
+  updatePharmacyPrescription,
+  findPrescriptions
 } from "../controllers/prescriptionController.js";
 import { auth, checkAuthRole } from "../middleware/auth.js";
 import roles from "../helpers/roles.js";
@@ -33,6 +34,9 @@ pharmacyRouter
   .get(auth, checkAuthRole([roles.Pharmacy]), getPharmacyPrescriptions);
 pharmacyRouter
   .route("/update-prescription")
-  .post(auth, checkAuthRole([roles.Pharmacy]), updatePrescription);
+  .put(auth, checkAuthRole([roles.Pharmacy]), updatePharmacyPrescription);
+pharmacyRouter
+  .route("/find-prescriptions")
+  .get(auth, checkAuthRole([roles.Pharmacy]), findPrescriptions);
 //
 export default pharmacyRouter;

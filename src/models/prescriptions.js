@@ -7,84 +7,86 @@ const prescriptionsSchema = new mongoose.Schema({
   pt: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Patients",
-    required: true
+    required: true,
   },
   doc: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Doctors",
-    required: true
-
+    required: true,
   },
   phar: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Pharmacies"
+    ref: "Pharmacies",
   },
   apt: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Appointments"
+    ref: "Appointments",
   },
-  createdAt:{
+  createdAt: {
     type: Date,
     default: Date.now,
-    required: true
+    required: true,
   },
-  updateDt:{
+  updateDt: {
     type: Date,
     default: Date.now,
-    required: true
+    required: true,
   },
   status: {
     type: String,
     default: "New",
-    enum: ["New","Ready", "Dispensed"],
-    required: true
+    enum: ["New", "Ready", "Dispensed"],
+    required: true,
   },
   medications: [],
-  validDt:{
+  validDt: {
     type: Date,
   },
-  nshId:{
+  nshId: {
     type: String,
-    required: true
+    required: true,
   },
-  payStatus:{
+  payStatus: {
     type: String,
     default: "Unpaid",
     enum: ["Unpaid", "Paid"],
-    required: true
+    required: true,
   },
-  amount:{
+  paidBy: {
+    type: String,
+    enum: ["Cash", "Card"],
+  },
+  amount: {
     type: String,
   },
-  repeatReq:{
+  repeatReq: {
     type: Boolean,
-    default: false
+    default: false,
   },
-  opid:{
-    type: mongoose.Schema.Types.ObjectId
+  opid: {
+    type: mongoose.Schema.Types.ObjectId,
   },
   repeatOption: {
     type: Boolean,
-    default: false
+    default: false,
   },
-  repeatPresDt:{
+  repeatPresDt: {
     type: Date,
   },
-  repeatReqDt:{
+  repeatReqDt: {
     type: Date,
   },
-  dispensedReqDt:{
+  dispensedDt: {
     type: Date,
   },
-  presType:{
+  presType: {
     type: String,
     enum: ["New", "Repeated"],
-    required: true
+    required: true,
   },
-  rpid:{
-    type: mongoose.Schema.Types.ObjectId
+  rpid: {
+    type: mongoose.Schema.Types.ObjectId,
   },
-
 });
 //
 const Prescriptions = mongoose.model("Prescriptions", prescriptionsSchema);
