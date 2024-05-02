@@ -12,6 +12,7 @@ import patientRouter from "./patientRoutes.js";
 import nurseRouter from "./nurseRoutes.js";
 import pharmacyRouter from "./pharmacyRoutes.js";
 import aptRouter from "./appointmentRoutes.js";
+import stripeRouter from "./stripeRoutes.js";
 
 // otp routes
 router.use("/otp",  otpRoutes);
@@ -22,6 +23,7 @@ router.use("/patient", patientRouter);
 router.use("/nurse", nurseRouter);
 router.use("/pharmacy", pharmacyRouter);
 router.use("/apt", aptRouter);
+router.use("/stripe", stripeRouter);
 
 //
 export default router;

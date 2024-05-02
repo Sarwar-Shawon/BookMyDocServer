@@ -35,9 +35,9 @@ const createPrescription = async (req, res) => {
       nshId: apt?.pt.nhs,
       repeatOption: req.body.repeatOption,
       presType: "New",
-      amount: parseFloat(req.body.medications.length * 9.65).toString(),
+      amount : parseFloat(req.body.medications.length * 9.65).toString()
     };
-    console.log("req.bodyreq.bodyreq.body:::", req.body);
+    console.log("req.bodyreq.bodyreq.body:::",req.body)
     if (req.body.phr_id) params.phar = req.body.phr_id;
 
     console.log("params:::", params);
@@ -214,14 +214,8 @@ const updatePharmacyPrescription = async (req, res) => {
     //
     res.status(200).json({
       success: true,
-      data: {
-        _id: prescription._id,
-        status: prescription.status,
-        payStatus: prescription.payStatus,
-        updateDt: prescription.updateDt,
-        paidBy: prescription.paidBy,
-      },
-      message: "Prescription has updated successfully",
+      data: {_id: prescription._id , status:  prescription.status ,  payStatus: prescription.payStatus , updateDt: prescription.updateDt , paidBy: prescription.paidBy },
+      message: "Prescription has updated successfully"
     });
   } catch (err) {
     //return err
