@@ -382,7 +382,8 @@ const reqRepeatPrescription = async (req, res) => {
     const patient = req.patient;
     const pres = await Prescriptions.findById(req.body.pres_id)
       .populate("doc", { doc_email: 1, f_name: 1, l_name: 1 })
-      .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1, nhs: 1, dob: 1 });
+      .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1, nhs: 1, dob: 1 })
+      .populate("phar", { _id: 1, name: 1, addr: 1, phone: 1 , img: 1 });
     if (!pres && !patient) {
       return res.status(422).json({ success: false, error: "No data found" });
     }

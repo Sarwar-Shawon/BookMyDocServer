@@ -3,6 +3,7 @@
  */
 import Doctors from "../models/doctors.js";
 import Organizations from "../models/organization.js";
+import Departments from "../models/departments.js";
 import Patients from "../models/patients.js";
 import jwt from "jsonwebtoken";
 import {getToken} from "../utils/getToken.js";
@@ -35,6 +36,11 @@ const getDoctors = async (req, res) => {
           },
         }).distinct("_id"),
       }
+    }
+    query.dept = {
+      $in: await Departments.find({
+        active: true
+      }).distinct("_id"),
     }
     //
     const doctors = await Doctors.find(query)
