@@ -87,6 +87,9 @@ const prescriptionsSchema = new mongoose.Schema({
   rpid: {
     type: mongoose.Schema.Types.ObjectId,
   },
+  transObj: {
+    type: Object,
+  }
 });
 //
 const Prescriptions = mongoose.model("Prescriptions", prescriptionsSchema);

@@ -129,46 +129,6 @@ const createRepeatPrescription = async (req, res) => {
   }
 };
 //
-const updatePrescription = async (req, res) => {
-  try {
-    //
-    const doctor = req.doctor;
-    if (!doctor) {
-      return res.status(422).json({ success: false, error: "No data found" });
-    }
-    const prescription = await Prescriptions.findById(req.body.pr_id);
-    console.log("prescription", prescription);
-    if (!prescription) {
-      return res
-        .status(422)
-        .json({ success: false, error: "No prescription found" });
-    }
-    prescription.medications = req.body.medications;
-    prescription.validDt = req.body.validDt;
-    prescription.updateDt = Date.now;
-    //
-    await prescription.save();
-    // mailSender({
-    //   to: [apt?.pt?.pt_email, apt?.doc?.doc_email],
-    //   subject: "Create Appointment",
-    //   body: `<p>Your <strong>Doctor: </strong> ${[
-    //     doctor?.f_name,
-    //     doctor?.l_name,
-    //   ].join(" ")} has created a prescription for you.</n>
-    //       <strong> Prescription Id:</strong> ${prescription._id}</n>
-    //     </p>`,
-    // });
-    //
-    res.status(200).json({
-      success: true,
-      data: prescription,
-    });
-  } catch (err) {
-    //return err
-    return res.status(500).json({ success: false, error: err.message });
-  }
-};
-//
 const updatePharmacyPrescription = async (req, res) => {
   try {
     //
@@ -328,7 +288,7 @@ const getPatientPrescriptions = async (req, res) => {
         ],
       })
       .populate("pt", { _id: 1, f_name: 1, l_name: 1, img: 1, nhs: 1, dob: 1 })
-      .populate("phar", { _id: 1, name: 1, addr: 1, phone: 1 })
+      .populate("phar", { _id: 1, name: 1, addr: 1, phone: 1 , img: 1 })
       .skip(skip)
       .limit(limit);
     console.log("prescriptions:::", prescriptions);
@@ -555,11 +515,53 @@ const findPrescriptions = async (req, res) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 };
-
+//
+const updatePatientPrescriptionPayment = async (req, res) => {
+  try {
+    console.log("req.transObj", req.transObj)
+    //
+    const prescription = await Prescriptions.findById(req.transObj.pres_id).populate({
+      path: "pt",
+      select: "f_name l_name pt_email",
+    });
+    console.log("prescriptions:::", prescription)
+    //
+    if (!prescription) {
+      return res
+        .status(422)
+        .json({ success: false, error: "No prescription found" });
+    }
+    //update
+    prescription.payStatus = "Paid";
+    prescription.paidBy = "Card";
+    prescription.updateDt = Date.now();
+    prescription.transObj = {
+      payment_intent: req.transObj.payment_intent,
+      paid_amount: req.transObj.paid_amount,
+    };
+    //
+    await prescription.save();
+    //
+    mailSender({
+      to: [prescription?.pt?.pt_email],
+      subject: "Prescription Payment",
+      body: `<strong> Prescription Id:</strong> ${prescription._id} has been paid successfuly by <strong>Patient: </strong> ${[prescription?.pt?.f_name , prescription?.pt?.l_name].join(" ")}</n>
+        </p>`,
+    });
+    //
+    res.status(200).json({
+      success: true,
+      data: prescription,
+      message: "Prescription has been paid successfuly."
+    });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
 export {
   //
   createPrescription,
-  updatePrescription,
   getDoctorPrescriptions,
   getPatientPrescriptions,
   getPharmacyPrescriptions,
@@ -568,4 +570,5 @@ export {
   reqRepeatPrescription,
   findPrescriptions,
   updatePharmacyPrescription,
+  updatePatientPrescriptionPayment
 };

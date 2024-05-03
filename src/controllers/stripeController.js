@@ -4,6 +4,7 @@
 import { getToken } from "../utils/getToken.js";
 import jwt from "jsonwebtoken";
 import stripe from "stripe";
+import {updatePatientPrescriptionPayment} from '../controllers/prescriptionController.js'
 const stripeInstance = stripe(process.env.STRIPE_KEY_SERVER);
 import mailSender from "../services/mailSender.js";
 //
@@ -19,6 +20,9 @@ const createStripeCheckout = async (req, res) => {
     mode: "payment",
     success_url: `${process.env.CLIENT_APP_URL}/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.CLIENT_APP_URL}/checkout-cancel`,
+    metadata: {
+        pres_id: req.body.pres_id
+    }
   });
   //   res.send(303, session.url);
   res.status(200).json({
@@ -27,18 +31,27 @@ const createStripeCheckout = async (req, res) => {
   });
 };
 //
-const getTransactionDetails = async (req, res) => {
+const updatePatientTransactionDetails = async (req, res) => {
   try {
-    const sessionId = req.query.sessionId;
-    const session = await stripeInstance.checkout.sessions.retrieve(sessionId);
-    const transactionDetails = {
-      id: session.id,
-      amount: session.amount_total,
-    };
-    res.status(200).json({
-      success: true,
-      data: transactionDetails,
-    });
+    //
+    const token = getToken(req.headers["authorization"]);
+    const curUser = jwt.decode(token);
+    if (!curUser) {
+      return res.status(422).json({ success: false, error: "user not found" });
+    }
+    const sessionId = req.body.sessionId;
+    const transaction = await stripeInstance.checkout.sessions.retrieve(sessionId);
+    //
+    console.log("transactiontransactiontransaction: ", transaction)
+    //
+    if (transaction?.payment_intent) {
+      req.transObj = {
+        payment_intent: transaction.payment_intent,
+        paid_amount: transaction.amount_total,
+        pres_id: transaction?.metadata?.pres_id,
+      };
+      return await updatePatientPrescriptionPayment(req, res);
+    }
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -50,5 +63,5 @@ const getTransactionDetails = async (req, res) => {
 export {
   //
   createStripeCheckout,
-  getTransactionDetails
+  updatePatientTransactionDetails
 };
