@@ -8,7 +8,6 @@ import randomstring from "randomstring";
 import Otps from "../models/otpModels.js";
 import mailSender from "../services/mailSender.js";
 import UserToken from "../models/userToken.js";
-import { validationResult } from "express-validator";
 import { generateTokens } from "../utils/generateTokens.js";
 import { verifyRefreshToken } from "../utils/verifyRefreshToken.js";
 import { hashPassword, comparePassword } from "../utils/encryptPassword.js";
@@ -17,16 +16,6 @@ import { getToken } from "../utils/getToken.js";
 //to register new patients
 const signUpPatients = async (req, res) => {
   try {
-    //check validation fields
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      let err_msg = "";
-      errors.array().map((item, index) => {
-        err_msg += item.msg;
-        if (index != errors.array().length - 1) err_msg += "\n";
-      });
-      return res.status(422).json({ success: false, error: err_msg });
-    }
     //hash password
     const hash_password = await hashPassword(req.body.password);
     //save to users table
@@ -88,17 +77,6 @@ const signUpPatients = async (req, res) => {
 //to sign in
 const login = async (req, res) => {
   try {
-    //validation
-    const errors = validationResult(req);
-    //error handle
-    if (!errors.isEmpty()) {
-      let err_msg = "";
-      errors.array().map((item, index) => {
-        err_msg += item.msg;
-        if (index != errors.array().length - 1) err_msg += "\n";
-      });
-      return res.status(500).json({ success: false, error: err_msg });
-    }
     console.log("req.body", req.body);
     const user = await Users.findOne({ email: req.body.username });
     console.log("user::", user);
@@ -253,19 +231,8 @@ const verifyPatientsAccount = async (req, res) => {
 const changePassword = async (req, res) => {
   try {
     console.log("reqreqreqreq:::", req.body);
-    //check validation fields
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      let err_msg = "";
-      errors.array().map((item, index) => {
-        err_msg += item.msg;
-        if (index != errors.array().length - 1) err_msg += "\n";
-      });
-      return res.status(422).json({ success: false, error: err_msg });
-    }
     //
     const token = getToken(req.headers["authorization"]);
-
     //
     const curUser = jwt.decode(token);
     if (!curUser) {
@@ -337,16 +304,6 @@ const sendForgotPasswordOtp = async (req, res) => {
 //forgotPasswordChange
 const forgotPasswordChange = async (req, res) => {
   try {
-    //check validation fields
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      let err_msg = "";
-      errors.array().map((item, index) => {
-        err_msg += item.msg;
-        if (index != errors.array().length - 1) err_msg += "\n";
-      });
-      return res.status(422).json({ success: false, error: err_msg });
-    }
     //
     const findOtp = await verifyOTP({
       email: req.body.username,

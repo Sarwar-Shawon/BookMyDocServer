@@ -7,6 +7,8 @@ import Departments from "../models/departments.js";
 import Patients from "../models/patients.js";
 import jwt from "jsonwebtoken";
 import {getToken} from "../utils/getToken.js";
+import { encryptData, decryptData } from "../utils/encryptData.js"
+
 //get all doctors
 const getDoctors = async (req, res) => {
   try {
@@ -120,6 +122,8 @@ const updatePatientHealthRecord = async (req, res) => {
     const patient = await Patients.findById(req.body.pt_id);
     console.log("patient",patient)
     patient.medical_history = req.body.medical_history;
+    // patient.medical_history = encryptData(JSON.stringify(req.body.medical_history));
+
     patient.save()
     //
     res.status(200).json({

@@ -8,6 +8,7 @@ const pharmaciesSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   },
   name: {
     type: String,

@@ -8,6 +8,7 @@ const nursesSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   },
   f_name: {
     type: String,

@@ -11,6 +11,8 @@ import mailSender from "../services/mailSender.js";
 import { getToken } from "../utils/getToken.js";
 import jwt from "jsonwebtoken";
 import moment from "moment";
+import { encryptData, decryptData } from "../utils/encryptData.js"
+
 //
 const createAppointment = async (req, res) => {
   try {
@@ -329,8 +331,14 @@ const getDoctorAppointments = async (req, res) => {
       })
       .skip(skip)
       .limit(limit);
-    // console.log("appointmentsappointments:::", appointments);
+    console.log("appointmentsappointments:::", appointments);
     //
+    // appointments.map((item)=>{
+    //   if(item.pt.medical_history)
+    //   item.pt.medical_history = JSON.parse(decryptData(item.pt.medical_history));
+    // })
+    
+
     res.status(200).json({
       success: true,
       data: appointments,
