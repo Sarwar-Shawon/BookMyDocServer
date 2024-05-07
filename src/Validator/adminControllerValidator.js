@@ -15,16 +15,7 @@ const doctorRegisterValidator = [
     .withMessage("first name is required"),
   check("l_name")
     .notEmpty()
-    .withMessage("last name is required"),
-  check("dob")
-    .notEmpty()
-    .withMessage("date of birth is required"),
-  check("nhs_id")
-    .notEmpty()
-    .withMessage("doctor licence number is required"),
-  check("addr")
-    .notEmpty()
-    .withMessage("doctor addressis required"),
+    .withMessage("last name is required")
 
 ];
 //register nurse Validator
@@ -40,14 +31,23 @@ const nurseRegisterValidator = [
     .withMessage("first name is required"),
   check("l_name")
     .notEmpty()
-    .withMessage("last name is required"),
-  check("dob")
+    .withMessage("last name is required")
+];
+//register pharmacy Validator
+const pharmacyRegisterValidator = [
+  check("phar_email")
     .notEmpty()
-    .withMessage("date of birth is required"),
-  check("nhs_id")
+    .withMessage("Pharmacy email is required")
+    .bail()
+    .isEmail()
+    .withMessage("Invalid email format"),
+  check("name")
     .notEmpty()
-    .withMessage("nurse licence number is required"),
+    .withMessage("Name is required"),
+  check("licence")
+    .notEmpty()
+    .withMessage("licence is required"),
 
 ];
 //
-export { doctorRegisterValidator, nurseRegisterValidator};
+export { doctorRegisterValidator, nurseRegisterValidator , pharmacyRegisterValidator};

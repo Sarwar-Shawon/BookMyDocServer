@@ -19,7 +19,7 @@ import {
 import {
   createOrganization,
   getOrganizations,
-  updadteOrganization
+  updadteOrganization,
 } from "../controllers/organizationController.js";
 import {
   createDepartment,
@@ -29,72 +29,131 @@ import {
 //validator
 import {
   doctorRegisterValidator,
-  nurseRegisterValidator
+  nurseRegisterValidator,
+  pharmacyRegisterValidator
 } from "../Validator/adminControllerValidator.js";
-import {
-  getProfile
-} from "../controllers/profileController.js";
+import { getProfile } from "../controllers/profileController.js";
 //authurization check
 import { auth, checkAuthRole } from "../middleware/auth.js";
-import roles from '../helpers/roles.js'
+import roles from "../helpers/roles.js";
 import { upload } from "../utils/uploadImage.js";
-
+import { validateReq } from "../middleware/validateMiddleware.js";
 const adminRouter = express.Router();
 //
 adminRouter
   .route("/registerDoctor")
-  .post( doctorRegisterValidator , auth , checkAuthRole([roles.Admin]) , upload.single("img") ,registerNewDoctror);
+  .post(
+    auth,
+    checkAuthRole([roles.Admin]),
+    upload.single("img"),
+    doctorRegisterValidator,
+    validateReq,
+    registerNewDoctror
+  );
 adminRouter
   .route("/getAllDoctors")
-  .get(auth , checkAuthRole([roles.Admin,]) , getAllDoctors);
+  .get(auth, checkAuthRole([roles.Admin]), getAllDoctors);
 adminRouter
   .route("/updateDoctor")
-  .put( auth, checkAuthRole([roles.Admin, roles.Doctor]), upload.single("img"), updadteDoctor);
+  .put(
+    auth,
+    checkAuthRole([roles.Admin, roles.Doctor]),
+    upload.single("img"),
+    updadteDoctor
+  );
 //
 adminRouter
   .route("/registerNurse")
-  .post( nurseRegisterValidator, auth , checkAuthRole([roles.Admin]) , upload.single("img"), registerNewNurse);
+  .post(
+    auth,
+    checkAuthRole([roles.Admin]),
+    upload.single("img"),
+    nurseRegisterValidator,
+    validateReq,
+    registerNewNurse
+  );
 adminRouter
   .route("/updateNurse")
-  .put( auth, checkAuthRole([roles.Admin , roles.Nurse]) , upload.single("img") ,  updadteNurse, );
+  .put(
+    auth,
+    checkAuthRole([roles.Admin, roles.Nurse]),
+    upload.single("img"),
+    updadteNurse
+  );
 adminRouter
   .route("/getAllNurses")
-  .get( auth, checkAuthRole([roles.Admin]) , getAllNurses);
+  .get(auth, checkAuthRole([roles.Admin]), getAllNurses);
 adminRouter
   .route("/getAllNursesByDeptOrg")
-  .get( auth, checkAuthRole([roles.Admin]) , getAllNursesByDeptAndOrg);
+  .get(auth, checkAuthRole([roles.Admin]), getAllNursesByDeptAndOrg);
 //
 adminRouter
   .route("/registerPharmacy")
-  .post( auth,checkAuthRole([roles.Admin]), upload.single("img") , registerNewPharmacy);
+  .post(
+    auth,
+    checkAuthRole([roles.Admin]),
+    upload.single("img"),
+    pharmacyRegisterValidator,
+    validateReq,
+    registerNewPharmacy
+  );
 adminRouter
   .route("/updatePharmacy")
-  .put( auth, checkAuthRole([roles.Admin , roles.Pharmacy]) , upload.single("img") , updadtePharmacy);
+  .put(
+    auth,
+    checkAuthRole([roles.Admin, roles.Pharmacy]),
+    upload.single("img"),
+    updadtePharmacy
+  );
 adminRouter
   .route("/getAllPharmacies")
-  .get( auth,checkAuthRole([roles.Admin]) , getAllPharmacies);
+  .get(auth, checkAuthRole([roles.Admin]), getAllPharmacies);
 //department
 adminRouter
   .route("/createDepartment")
-  .post(  auth , checkAuthRole([roles.Admin]) , upload.single("img") ,createDepartment);
+  .post(
+    auth,
+    checkAuthRole([roles.Admin]),
+    upload.single("img"),
+    createDepartment
+  );
 adminRouter
   .route("/getAllDepartments")
-  .get(auth , checkAuthRole([roles.Admin, roles.Doctor, roles.Patient ,  roles.Nurse]) , getDepartments);
+  .get(
+    auth,
+    checkAuthRole([roles.Admin, roles.Doctor, roles.Patient, roles.Nurse]),
+    getDepartments
+  );
 adminRouter
   .route("/updadteDepartment")
-  .put( auth, checkAuthRole([roles.Admin]), upload.single("img"), updadteDepartment);
+  .put(
+    auth,
+    checkAuthRole([roles.Admin]),
+    upload.single("img"),
+    updadteDepartment
+  );
 //organization
 adminRouter
   .route("/createOrganization")
-  .post(  auth , checkAuthRole([roles.Admin]) , upload.single("img") ,createOrganization);
+  .post(
+    auth,
+    checkAuthRole([roles.Admin]),
+    upload.single("img"),
+    createOrganization
+  );
 adminRouter
   .route("/getAllOrganizations")
-  .get(auth , checkAuthRole([roles.Admin]) , getOrganizations);
+  .get(auth, checkAuthRole([roles.Admin]), getOrganizations);
 adminRouter
   .route("/updadteOrganization")
-  .put( auth, checkAuthRole([roles.Admin]), upload.single("img"), updadteOrganization);
+  .put(
+    auth,
+    checkAuthRole([roles.Admin]),
+    upload.single("img"),
+    updadteOrganization
+  );
 adminRouter
   .route("/get-profile")
-  .get( auth, checkAuthRole([roles.Admin]), getProfile);
+  .get(auth, checkAuthRole([roles.Admin]), getProfile);
 //
 export default adminRouter;

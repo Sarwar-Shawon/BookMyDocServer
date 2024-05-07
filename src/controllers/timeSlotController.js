@@ -353,4 +353,5 @@ export {
   getTimeSlotsByDate,
   getHolidays,
   updateHolidays,
+  checkDateExistInHolidays
 };

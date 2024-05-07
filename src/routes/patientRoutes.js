@@ -7,7 +7,7 @@ import {
   getDepartments,
 } from "../controllers/departmentController.js";
 import { getTimeSlotsForPatient } from "../controllers/timeSlotController.js";
-import { getDoctors,getDoctorsByDepartment } from "../controllers/patientController.js";
+import { getDoctors,getDoctorsByDepartment,getAvailableDoctorsByDate } from "../controllers/patientController.js";
 import {
   createAppointment,
   getPatientAppointments,
@@ -55,6 +55,9 @@ patientRouter
 patientRouter
   .route("/get-all-doctors")
   .get(auth, checkAuthRole([roles.Patient]), getDoctors);
+patientRouter
+  .route("/get-all-doctors-date")
+  .get(auth, checkAuthRole([roles.Patient]), getAvailableDoctorsByDate);
 /*
  * Timeslots
  */
