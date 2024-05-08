@@ -22,6 +22,11 @@ const doctorsSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  gender: {
+    type: String,
+    enum: ["Male", "Female"],
+
+  },
   phone: {
     type: String,
     default: "",

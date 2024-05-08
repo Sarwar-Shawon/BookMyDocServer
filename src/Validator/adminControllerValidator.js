@@ -6,16 +6,16 @@ import { check } from "express-validator";
 const doctorRegisterValidator = [
   check("doc_email")
     .notEmpty()
-    .withMessage("doctor email is required")
+    .withMessage("Doctor email is required")
     .bail()
     .isEmail()
     .withMessage("Invalid email format"),
   check("f_name")
     .notEmpty()
-    .withMessage("first name is required"),
+    .withMessage("First name is required"),
   check("l_name")
     .notEmpty()
-    .withMessage("last name is required")
+    .withMessage("Last name is required")
 
 ];
 //register nurse Validator
@@ -28,10 +28,10 @@ const nurseRegisterValidator = [
     .withMessage("Invalid email format"),
   check("f_name")
     .notEmpty()
-    .withMessage("first name is required"),
+    .withMessage("First name is required"),
   check("l_name")
     .notEmpty()
-    .withMessage("last name is required")
+    .withMessage("Last name is required")
 ];
 //register pharmacy Validator
 const pharmacyRegisterValidator = [
@@ -46,7 +46,7 @@ const pharmacyRegisterValidator = [
     .withMessage("Name is required"),
   check("licence")
     .notEmpty()
-    .withMessage("licence is required"),
+    .withMessage("Licence is required"),
 
 ];
 //

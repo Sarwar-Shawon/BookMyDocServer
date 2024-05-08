@@ -266,15 +266,24 @@ const getPatientPrescriptions = async (req, res) => {
         : 0;
     const limit = req.query.limit || 10;
     //
-    console.log("startDay", startDay);
-    console.log("endDay", endDay);
-    const prescriptions = await Prescriptions.find({
+    // console.log("startDay", startDay);
+    // console.log("endDay", endDay);
+    //
+    const query = {
       pt: patient._id,
       createdAt: {
         $gte: startDay,
         $lte: endDay,
       },
-    })
+    }
+    if(req.query.prType){
+      query.presType = req.query.prType
+    }
+    if(req.query.prStatus){
+      query.status = req.query.prStatus
+    }
+    //
+    const prescriptions = await Prescriptions.find(query)
       .populate({
         path: "doc",
         select: "_id f_name l_name img organization dept pSign",
@@ -342,13 +351,17 @@ const getPharmacyPrescriptions = async (req, res) => {
     //
     console.log("startDay", startDay);
     console.log("endDay", endDay);
-    const prescriptions = await Prescriptions.find({
+    const query = {
       phar: pharmacy._id,
       createdAt: {
         $gte: startDay,
         $lte: endDay,
       },
-    })
+    }
+    if(req.query.prStatus){
+      query.status = req.query.prStatus
+    }
+    const prescriptions = await Prescriptions.find(query)
       .populate({
         path: "doc",
         select: "_id f_name l_name img organization dept pSign",

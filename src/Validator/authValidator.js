@@ -7,7 +7,7 @@ const loginValidator = [
   //email
   check("username")
     .notEmpty()
-    .withMessage("email is required")
+    .withMessage("Email is required")
     .bail()
     .isEmail()
     .withMessage("Invalid email format"),
@@ -20,7 +20,7 @@ const registerValidator = [
   //email
   check("username")
     .notEmpty()
-    .withMessage("email is required")
+    .withMessage("Email is required")
     .bail()
     .isEmail()
     .withMessage("Invalid email format"),
@@ -38,49 +38,49 @@ const registerValidator = [
     ),
     check("firstName")
     .notEmpty()
-    .withMessage("user first name is required"),  
+    .withMessage("User first name is required"),  
     check("dob")
     .notEmpty()
-    .withMessage("user date of birth is required"),  
+    .withMessage("User date of birth is required"),  
     check("gender")
     .notEmpty()
-    .withMessage("user gender is required"),  
+    .withMessage("User gender is required"),  
     check("nhsId")
     .notEmpty()
-    .withMessage("user NHS Id is required"),  
+    .withMessage("User NHS Id is required"),  
 ];
 //change password Validator
 const changePasswordValidator = [
   check("old_password")
     .notEmpty()
-    .withMessage("old password is required"),
+    .withMessage("Old password is required"),
   check("new_password")
     .notEmpty()
-    .withMessage("new password is required")
+    .withMessage("New password is required")
     .bail()
     .isLength({ min: 8 })
-    .withMessage("new Password must be at least 8 characters long")
+    .withMessage("New Password must be at least 8 characters long")
     .bail()
     .matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)/)
     .withMessage(
-      "new Password must contain at least one uppercase letter, one lowercase letter, and one number"
+      "New Password must contain at least one uppercase letter, one lowercase letter, and one number"
     ),
 ];
 //cahnge forgot password Validator
 const changeForgotPasswordValidator = [
   check("otp")
     .notEmpty()
-    .withMessage("otp is required"),
+    .withMessage("OTP is required"),
   check("new_password")
     .notEmpty()
-    .withMessage("new password is required")
+    .withMessage("New password is required")
     .bail()
     .isLength({ min: 8 })
-    .withMessage("new Password must be at least 8 characters long")
+    .withMessage("New Password must be at least 8 characters long")
     .bail()
     .matches(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)/)
     .withMessage(
-      "new Password must contain at least one uppercase letter, one lowercase letter, and one number"
+      "New Password must contain at least one uppercase letter, one lowercase letter, and one number"
     ),
 ];
 //

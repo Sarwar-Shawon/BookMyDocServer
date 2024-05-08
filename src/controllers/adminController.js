@@ -10,9 +10,6 @@ import roles from "../helpers/roles.js";
 import mailSender from "../services/mailSender.js";
 import { hashPassword } from "../utils/encryptPassword.js";
 import mongoose from "mongoose";
-const ObjectId = mongoose.Schema.Types.ObjectId;
-import path from "path";
-
 //
 const registerToSystem = async (obj) => {
   try {
@@ -73,6 +70,7 @@ const registerNewDoctror = async (req, res) => {
       // addr: req.body.addr,
       active: req.body.active,
       dept: req.body.dept,
+      gender: req.body.gender,
       organization: req.body.organization,
       img: imgUrl,
       nurses: req.body.nurses,
@@ -137,6 +135,7 @@ const updadteDoctor = async (req, res) => {
     doctor.gmc_licence = req.body.gmc_licence;
     // doctor.addr = req.body.addr;
     doctor.active = req.body.active;
+    doctor.gender= req.body.gender,
     doctor.img = imgUrl;
     doctor.dept = req.body.dept;
     doctor.organization = req.body.organization;
@@ -208,7 +207,7 @@ const registerNewNurse = async (req, res) => {
       dob: req.body.dob,
       phone: req.body.phone,
       gmc_licence: req.body.gmc_licence,
-      // addr: req.body.addr,
+      gender: req.body.gender,
       active: req.body.active,
       dept: req.body.dept,
       organization: req.body.organization,
@@ -275,6 +274,7 @@ const updadteNurse = async (req, res) => {
     nurse.nhs_id = req.body.nhs_id;
     // nurse.addr = req.body.addr;
     nurse.dept = req.body.dept;
+    nurse.gender= req.body.gender,
     nurse.active = req.body.active;
     nurse.organization = req.body.organization;
     nurse.img = imgUrl;
