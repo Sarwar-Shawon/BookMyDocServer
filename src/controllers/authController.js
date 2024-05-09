@@ -77,9 +77,8 @@ const signUpPatients = async (req, res) => {
 //to sign in
 const login = async (req, res) => {
   try {
-    console.log("req.body", req.body);
     const user = await Users.findOne({ email: req.body.username });
-    console.log("user::", user);
+    // console.log("user::", user);
     if (user) {
       const matchPass = await comparePassword(req.body.password, user.password);
       if (matchPass) {
@@ -132,7 +131,7 @@ const login = async (req, res) => {
 // sign out
 const logout = async (req, res) => {
   try {
-    console.log("req.headers.cookies", req.cookies["_aprt"]);
+    //console.log("req.headers.cookies", req.cookies["_aprt"]);
     await UserToken.findOneAndDelete({
       token: req.cookies["_aprt"],
     });
@@ -189,7 +188,7 @@ const verifyPatientsAccount = async (req, res) => {
       return res.status(422).json({ success: false, error: "Otp is required" });
     }
     const user = jwt.decode(req.cookies["_apot"]);
-    console.log("user:::", user);
+    // console.log("user:::", user);
     if (!user) {
       return res.status(422).json({ success: false, error: "session expired" });
     }
@@ -197,7 +196,7 @@ const verifyPatientsAccount = async (req, res) => {
       email: user.user_id,
       otp: req.body.otp,
     });
-    console.log("findOtp:::", findOtp);
+    //console.log("findOtp:::", findOtp);
     if (findOtp?.success) {
       //update user verified
       await Users.findOneAndUpdate(
@@ -230,7 +229,6 @@ const verifyPatientsAccount = async (req, res) => {
 //changePassword
 const changePassword = async (req, res) => {
   try {
-    console.log("reqreqreqreq:::", req.body);
     //
     const token = getToken(req.headers["authorization"]);
     //
@@ -283,7 +281,7 @@ const sendForgotPasswordOtp = async (req, res) => {
     }
     //
     const user = await Users.findOne({ email: req.body.username });
-    console.log("user::", user);
+    //console.log("user::", user);
     if (user) {
       //
       await sendOTP({ email: req.body.username });
@@ -311,7 +309,7 @@ const forgotPasswordChange = async (req, res) => {
     });
     if (findOtp?.success) {
       const user = await Users.findOne({ email: req.body.username });
-      console.log("user::", user);
+      //console.log("user::", user);
       if (user) {
         user.password = await hashPassword(req.body.new_password);
         //
@@ -379,7 +377,7 @@ const requestNewOtp = async (req, res) => {
   try {
     const user = jwt.decode(req.cookies["_apot"]);
     //
-    console.log("user", user);
+    //console.log("user", user);
     if (!user) {
       return res.status(422).json({ success: false, error: "session expired" });
     }

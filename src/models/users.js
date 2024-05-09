@@ -3,7 +3,7 @@
  */
 import mongoose from "mongoose";
 import roles from '../helpers/roles.js'
-//
+//Users Collection
 const usersSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -33,7 +33,7 @@ const usersSchema = new mongoose.Schema({
     default: false
   },
   createAt:{
-    type: String, //Epoch Time
+    type: String,
     required: true,
     default: Date.now()
   }
