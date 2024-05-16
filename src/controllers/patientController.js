@@ -152,15 +152,12 @@ const getAvailableDoctorsByDate = async (req, res) => {
 
     const searchDate = new Date(req.query.date);
     const dayName = _days[searchDate.getDay()];
-    console.log("searchDate",searchDate)
-    console.log("dayName",dayName)
-    //
     //
     const query = {
       active: true,
     };
-    if(req.query.dept){
-      query.dept = req.query.dept
+    if (req.query.dept) {
+      query.dept = req.query.dept;
     }
     const lat = Number(req.query.lat);
     const lng = Number(req.query.lng);
@@ -181,18 +178,20 @@ const getAvailableDoctorsByDate = async (req, res) => {
         }).distinct("_id"),
       };
     }
-    const allDoctors = await Doctors.find(query).populate("dept", { _id: 1, name: 1 })
-    .populate("organization", { _id: 1, name: 1, addr: 1 })
-    .select({
-      f_name: 1,
-      l_name: 1,
-      dept: 1,
-      organization: 1,
-      img: 1,
-      _id: 1,
-      doc_email: 1,
-    }).skip(skip)
-      .limit(limit);;
+    const allDoctors = await Doctors.find(query)
+      .populate("dept", { _id: 1, name: 1 })
+      .populate("organization", { _id: 1, name: 1, addr: 1 })
+      .select({
+        f_name: 1,
+        l_name: 1,
+        dept: 1,
+        organization: 1,
+        img: 1,
+        _id: 1,
+        doc_email: 1,
+      })
+      .skip(skip)
+      .limit(limit);
     //
     const availableDoctors = [];
     //
@@ -226,16 +225,17 @@ const getAvailableDoctorsByDate = async (req, res) => {
           $lte: endDay,
         },
       });
-      console.log("existingAppointments",existingAppointments)
-
-      if(!existingAppointments.length && Object.entries(availableTimeSlots).length){
+      //
+      if (
+        !existingAppointments.length &&
+        Object.entries(availableTimeSlots).length
+      ) {
         availableDoctors.push(doctor);
         continue;
       }
-
+      //
       let isAvailable = false;
       for (const [timeSlot, details] of Object.entries(availableTimeSlots)) {
-        // console.log("timeSlottimeSlottimeSlot::",timeSlot)
         const isBooked = existingAppointments.some(
           (appointment) => appointment.timeslot === timeSlot
         );
@@ -248,7 +248,6 @@ const getAvailableDoctorsByDate = async (req, res) => {
         availableDoctors.push(doctor);
       }
     }
-
     res.status(200).json({
       success: true,
       data: availableDoctors,

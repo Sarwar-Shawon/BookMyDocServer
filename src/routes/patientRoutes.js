@@ -3,6 +3,8 @@
  */
 import express from "express";
 import { getProfile, updateProfile } from "../controllers/profileController.js";
+import { appointmentCreateValidator } from "../Validator/appointmentValidator.js";
+import { validateReq } from "../middleware/validateMiddleware.js";
 import {
   getDepartments,
 } from "../controllers/departmentController.js";
@@ -17,7 +19,7 @@ import {
 } from "../controllers/appointmentController.js";
 
 //authurization check
-import { auth, checkAuthRole, verifyPatient } from "../middleware/auth.js";
+import { auth, checkAuthRole, verifyPatient, } from "../middleware/auth.js";
 import roles from "../helpers/roles.js";
 import { upload } from "../utils/uploadImage.js";
 import {
@@ -69,7 +71,7 @@ patientRouter
  */
 patientRouter
   .route("/create-appointment")
-  .post(auth, checkAuthRole([roles.Patient]), createAppointment);
+  .post(auth, checkAuthRole([roles.Patient]),appointmentCreateValidator ,validateReq, createAppointment);
 patientRouter
   .route("/get-appointments")
   .get(verifyPatient, checkAuthRole([roles.Patient]), getPatientAppointments);

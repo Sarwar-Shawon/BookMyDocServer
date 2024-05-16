@@ -150,7 +150,7 @@ const updadteDoctor = async (req, res) => {
     //
     res.status(200).json({
       success: true,
-      message: "You've successfully updated your information.",
+      message: "You've successfully updated the information.",
       data: updData,
     });
   } catch (err) {
@@ -289,7 +289,7 @@ const updadteNurse = async (req, res) => {
     //return response
     res.status(200).json({
       success: true,
-      message: "You've successfully updated your information.",
+      message: "You've successfully updated the information.",
       data: updNur,
     });
   } catch (err) {
@@ -438,7 +438,7 @@ const updadtePharmacy = async (req, res) => {
     ]);
     res.status(200).json({
       success: true,
-      message: "You've successfully updated your information.",
+      message: "You've successfully updated the information.",
       data: updData,
     });
   } catch (err) {

@@ -537,7 +537,10 @@ const updatePatientPrescriptionPayment = async (req, res) => {
     const prescription = await Prescriptions.findById(req.transObj.pres_id).populate({
       path: "pt",
       select: "f_name l_name pt_email",
-    });
+    }).populate({
+      path: "phar",
+      select: "phar_email",
+    });;
     console.log("prescriptions:::", prescription)
     //
     if (!prescription) {
@@ -557,7 +560,7 @@ const updatePatientPrescriptionPayment = async (req, res) => {
     await prescription.save();
     //
     mailSender({
-      to: [prescription?.pt?.pt_email],
+      to: [prescription?.pt?.pt_email, prescription?.phar?.phar_email],
       subject: "Prescription Payment",
       body: `<strong> Prescription Id:</strong> ${prescription._id} has been paid successfuly by <strong>Patient: </strong> ${[prescription?.pt?.f_name , prescription?.pt?.l_name].join(" ")}</n>
         </p>`,

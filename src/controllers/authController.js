@@ -77,20 +77,37 @@ const signUpPatients = async (req, res) => {
 //to sign in
 const login = async (req, res) => {
   try {
+    console.log("req.bodyreq.bodyreq.bodyreq.body",req.body)
     const user = await Users.findOne({ email: req.body.username });
     // console.log("user::", user);
     if (user) {
       const matchPass = await comparePassword(req.body.password, user.password);
       if (matchPass) {
         // check account is verified or not
-        // if(!user.isVerified){
-        //   await sendOTP({email: req.body.username})
-        //   return res.status(400).json({
-        //     success: false,
-        //     status: 'not-verified',
-        //     data: "your account is not verified, an otp has been sent to your account please verify your account.",
-        //   });
-        // }
+        if(!user.isVerified){
+          await sendOTP({ email: req.body.username });
+          const payload = { user_id: req.body.username, roles: user.user_type };
+          const otpAccessToken = jwt.sign(
+            payload,
+            process.env.OTP_TOKEN_PRIVATE_KEY,
+            { expiresIn: process.env.OTP_ACCESS_TOKEN_LIFE }
+          );
+          //return response
+          return res
+            .cookie("_apot", otpAccessToken, {
+              httpOnly: true,
+              path: "/",
+              secure: true,
+              sameSite: "none",
+              maxAge: 5 * 60 * 1000,
+            })
+            .status(400)
+            .json({
+              success: false,
+              status: "not-verified",
+              error: "Your account is not verified, an otp has been sent to your account please verify your account within 5 minutes.",
+            });
+        }
         // generate jwt token
         const { accessToken, refreshToken } = await generateTokens(user);
         //return response
@@ -286,10 +303,26 @@ const sendForgotPasswordOtp = async (req, res) => {
       //
       await sendOTP({ email: req.body.username });
       //
-      res.status(200).json({
-        success: true,
-        message: "An OTP has been sent to your email address.",
-      });
+      const payload = { user_id: req.body.username, roles: user.user_type };
+      const otpAccessToken = jwt.sign(
+        payload,
+        process.env.OTP_TOKEN_PRIVATE_KEY,
+        { expiresIn: process.env.OTP_ACCESS_TOKEN_LIFE }
+      );
+      //return response
+      return res
+        .cookie("_apot", otpAccessToken, {
+          httpOnly: true,
+          path: "/",
+          secure: true,
+          sameSite: "none",
+          maxAge: 5 * 60 * 1000,
+        })
+        .status(200)
+        .json({
+          success: true,
+          message: "An OTP has been sent to your email address.",
+        });
     } else {
       return res.status(403).json({ success: false, error: "No user found." });
     }
@@ -313,9 +346,15 @@ const forgotPasswordChange = async (req, res) => {
       if (user) {
         user.password = await hashPassword(req.body.new_password);
         //
-        await Users.save();
+        await user.save();
         //
-        res.status(200).json({
+        res.cookie("_apot", "", {
+          httpOnly: true,
+          path: "/",
+          secure: true,
+          sameSite: "none",
+          maxAge: new Date(0),
+        }).status(200).json({
           success: true,
           message: "Password has changed successfully",
         });
@@ -375,15 +414,21 @@ const verifyOTP = async (obj) => {
 //
 const requestNewOtp = async (req, res) => {
   try {
+    console.log("req", req.cookies);
     const user = jwt.decode(req.cookies["_apot"]);
     //
-    //console.log("user", user);
     if (!user) {
       return res.status(422).json({ success: false, error: "session expired" });
     }
     const findOtp = await Otps.findOneAndDelete({ email: user.user_id });
     await sendOTP({ email: user.user_id });
     //
+    const payload = { user_id: user.user_id, roles: user.roles };
+    const otpAccessToken = jwt.sign(
+      payload,
+      process.env.OTP_TOKEN_PRIVATE_KEY,
+      { expiresIn: process.env.OTP_ACCESS_TOKEN_LIFE }
+    );
     return res
       .cookie("_apot", otpAccessToken, {
         httpOnly: true,
@@ -399,15 +444,7 @@ const requestNewOtp = async (req, res) => {
       });
   } catch (err) {
     //return err
-    if (err.code == "11000") {
-      res.status(409).json({
-        success: false,
-        status: "exists",
-        error: "User Email Already Exists.",
-      });
-    } else {
-      res.status(422).json({ success: false, error: err?.message });
-    }
+    res.status(422).json({ success: false, error: err?.message });
   }
 };
 //

@@ -12,9 +12,7 @@ const loginValidator = [
     .isEmail()
     .withMessage("Invalid email format"),
   //password
-  check("password")
-    .notEmpty()
-    .withMessage("Password is required")
+  check("password").notEmpty().withMessage("Password is required"),
 ];
 const registerValidator = [
   //email
@@ -36,24 +34,18 @@ const registerValidator = [
     .withMessage(
       "Password must contain at least one uppercase letter, one lowercase letter, and one number"
     ),
-    check("firstName")
+  check("firstName").notEmpty().withMessage("User first name is required"),
+  check("dob").notEmpty().withMessage("User date of birth is required"),
+  check("gender").notEmpty().withMessage("User gender is required"),
+  check("nhsId")
     .notEmpty()
-    .withMessage("User first name is required"),  
-    check("dob")
-    .notEmpty()
-    .withMessage("User date of birth is required"),  
-    check("gender")
-    .notEmpty()
-    .withMessage("User gender is required"),  
-    check("nhsId")
-    .notEmpty()
-    .withMessage("User NHS Id is required"),  
+    .withMessage("User NHS Id is required")
+    .isLength({ min: 10, max: 10 })
+    .withMessage("NHS id must be exactly 10 characters long"),
 ];
 //change password Validator
 const changePasswordValidator = [
-  check("old_password")
-    .notEmpty()
-    .withMessage("Old password is required"),
+  check("old_password").notEmpty().withMessage("Old password is required"),
   check("new_password")
     .notEmpty()
     .withMessage("New password is required")
@@ -68,9 +60,7 @@ const changePasswordValidator = [
 ];
 //cahnge forgot password Validator
 const changeForgotPasswordValidator = [
-  check("otp")
-    .notEmpty()
-    .withMessage("OTP is required"),
+  check("otp").notEmpty().withMessage("OTP is required"),
   check("new_password")
     .notEmpty()
     .withMessage("New password is required")
@@ -84,4 +74,9 @@ const changeForgotPasswordValidator = [
     ),
 ];
 //
-export { loginValidator, changePasswordValidator,changeForgotPasswordValidator,registerValidator };
+export {
+  loginValidator,
+  changePasswordValidator,
+  changeForgotPasswordValidator,
+  registerValidator,
+};
