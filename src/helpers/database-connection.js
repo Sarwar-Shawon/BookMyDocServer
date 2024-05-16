@@ -12,23 +12,26 @@ async function mongooseConnection() {
     /* this code is written to create an admin so that 
     whoever wants to test this app can use the dummy credential
     when they setup mongodb locally.*/
-    const existingUser = await Users.findOne({
-      email: "admin@bookmydoctor.com",
-    });
-    if (!existingUser) {
-      const dummyUser = new Users({
+    if (process.env.SERVER_STAGE === "TEST") {
+      const existingUser = await Users.findOne({
         email: "admin@bookmydoctor.com",
-        password: process.env.ADMIN_PASSWORD,
-        pas_cg_rq: false,
-        user_type: "Admin",
-        isVerified: true,
       });
-      await dummyUser.save();
-      console.log("Admin user created");
-    } else {
-      console.log("Admin user already exists");
+      if (!existingUser) {
+        const dummyUser = new Users({
+          email: "admin@bookmydoctor.com",
+          password: process.env.ADMIN_PASSWORD,
+          pas_cg_rq: false,
+          user_type: "Admin",
+          isVerified: true,
+        });
+        await dummyUser.save();
+        console.log("Admin user created");
+      } else {
+        console.log("Admin user already exists");
+      }
+      /*The avobe code is for only testing purpose.*/
     }
-    /*The avobe code is for only testing purpose.*/
+
 
   } catch (error) {
     console.error("Error connecting to MongoDB:", error.message);
