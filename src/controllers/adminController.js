@@ -48,7 +48,21 @@ const registerToSystem = async (obj) => {
     }
   }
 };
+//
+const deleteUsers = async (obj) => {
+  try {
+    const user = await Users.findOne({email: obj.email});
+    console.log("user",user)
+    console.log("user",obj)
+    if (!user) {
+      throw "No user found"
+    }
+    await user.deleteOne();
 
+  } catch (err) {
+    throw err
+  }
+};
 /*
  * Doctors.
  */
@@ -182,6 +196,33 @@ const getAllDoctors = async (req, res) => {
     res.status(200).json({
       success: true,
       data: doctors,
+    });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+// delete doctor
+const deleteDoctor = async (req, res) => {
+  try {
+    console.log('req.body',req.body)
+    let doctor = await Doctors.findById(req.body._id);
+    if (!doctor) {
+      return res.status(400).json({
+        success: false,
+        error: "No doctor found.",
+      });
+    }
+    const deletePromises = [
+      deleteUsers({ email: doctor.doc_email }),
+      doctor.deleteOne()
+    ];
+    await Promise.all(deletePromises);
+    //
+    res.status(200).json({
+      success: true,
+      message: "You've successfully deleted the doctor.",
+      data: req.body._id,
     });
   } catch (err) {
     //return err
@@ -350,6 +391,32 @@ const getAllNursesByDeptAndOrg = async (req, res) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 };
+// delete nurse
+const deleteNurse = async (req, res) => {
+  try {
+    let nurse = await Nurses.findById(req.body._id);
+    if (!nurse) {
+      return res.status(400).json({
+        success: false,
+        error: "No nurse found.",
+      });
+    }
+    const deletePromises = [
+      deleteUsers({ email: nurse.nur_email }),
+      nurse.deleteOne()
+    ];
+    await Promise.all(deletePromises);
+    //
+    res.status(200).json({
+      success: true,
+      message: "You've successfully deleted the nurse.",
+      data: req.body._id,
+    });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
 /*
  * Pharmacy.
  */
@@ -454,8 +521,11 @@ const getAllPharmacies = async (req, res) => {
         ? Number(req.query.skip)
         : 0;
     const limit = req.query.limit || 15;
-
-    const pharmacies = await Pharmacies.find({})
+    const query = {};
+    if (req.query.org){
+      query['org'] = req.query.org
+    }
+    const pharmacies = await Pharmacies.find(query)
       .populate("org", { _id: 1, name: 1 })
       .skip(skip)
       .limit(limit);
@@ -469,21 +539,49 @@ const getAllPharmacies = async (req, res) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 };
-
+// delete pharmacy
+const deletePharmacy = async (req, res) => {
+  try {
+    let pharmacy = await Pharmacies.findById(req.body._id);
+    if (!pharmacy) {
+      return res.status(400).json({
+        success: false,
+        error: "No pharmacy found.",
+      });
+    }
+    const deletePromises = [
+      deleteUsers({ email: pharmacy.phar_email }),
+      pharmacy.deleteOne()
+    ];
+    await Promise.all(deletePromises);
+    //
+    res.status(200).json({
+      success: true,
+      message: "You've successfully deleted the pharmacy.",
+      data: req.body._id,
+    });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
 //
 export {
   //
   registerNewDoctror,
   getAllDoctors,
   updadteDoctor,
+  deleteDoctor,
   //
   registerNewNurse,
   updadteNurse,
+  deleteNurse,
   getAllNurses,
   getAllNursesByDeptAndOrg,
   //
   registerNewPharmacy,
   updadtePharmacy,
+  deletePharmacy,
   getAllPharmacies,
 };
 

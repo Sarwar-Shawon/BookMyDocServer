@@ -6,14 +6,17 @@ import {
   registerNewDoctror,
   getAllDoctors,
   updadteDoctor,
+  deleteDoctor,
   //
   registerNewNurse,
   updadteNurse,
+  deleteNurse,
   getAllNurses,
   getAllNursesByDeptAndOrg,
   //
   registerNewPharmacy,
   updadtePharmacy,
+  deletePharmacy,
   getAllPharmacies,
 } from "../controllers/adminController.js";
 import {
@@ -30,7 +33,7 @@ import {
 import {
   doctorRegisterValidator,
   nurseRegisterValidator,
-  pharmacyRegisterValidator
+  pharmacyRegisterValidator,
 } from "../Validator/adminControllerValidator.js";
 import { getProfile } from "../controllers/profileController.js";
 //authurization check
@@ -61,6 +64,12 @@ adminRouter
     upload.single("img"),
     updadteDoctor
   );
+adminRouter
+  .route("/deleteDoctor")
+  .delete(auth, checkAuthRole([roles.Admin, roles.Doctor]), deleteDoctor);
+adminRouter
+  .route("/deleteNurse")
+  .delete(auth, checkAuthRole([roles.Admin]), deleteNurse);
 //
 adminRouter
   .route("/registerNurse")
@@ -80,6 +89,7 @@ adminRouter
     upload.single("img"),
     updadteNurse
   );
+
 adminRouter
   .route("/getAllNurses")
   .get(auth, checkAuthRole([roles.Admin]), getAllNurses);
@@ -105,6 +115,9 @@ adminRouter
     upload.single("img"),
     updadtePharmacy
   );
+adminRouter
+  .route("/deletePharmacy")
+  .delete(auth, checkAuthRole([roles.Admin]), deletePharmacy);
 adminRouter
   .route("/getAllPharmacies")
   .get(auth, checkAuthRole([roles.Admin]), getAllPharmacies);

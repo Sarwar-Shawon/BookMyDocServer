@@ -49,7 +49,7 @@ const prescriptionsSchema = new mongoose.Schema({
   payStatus: {
     type: String,
     default: "Unpaid",
-    enum: ["Unpaid", "Paid"],
+    enum: ["Unpaid", "Paid" , "Refunded"],
     required: true,
   },
   paidBy: {

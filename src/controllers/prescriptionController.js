@@ -576,6 +576,52 @@ const updatePatientPrescriptionPayment = async (req, res) => {
     return res.status(500).json({ success: false, error: err.message });
   }
 };
+//
+const updatePatientPrescriptionRefundPayment = async (req, res) => {
+  try {
+
+    const prescription = await Prescriptions.findById(req.body.pres_id).populate({
+      path: "pt",
+      select: "f_name l_name pt_email",
+    }).populate({
+      path: "phar",
+      select: "phar_email name",
+    });;
+    console.log("prescriptions:::", prescription)
+    //
+    if (!prescription) {
+      return res
+        .status(422)
+        .json({ success: false, error: "No prescription found" });
+    }
+    const transObj = prescription.transObj;
+    //update
+    if(req.refund){
+      transObj.refund_id  = req.refund.id
+    }
+    prescription.payStatus = "Refund";
+    prescription.transObj = transObj;
+    prescription.updateDt = Date.now();
+    //
+    await prescription.save();
+    //
+    mailSender({
+      to: [prescription?.pt?.pt_email, prescription?.phar?.phar_email],
+      subject: "Prescription Payment Refund",
+      body: `<strong> Prescription Id:</strong> ${prescription._id} has been refunded successfuly by <strong>Pharmacy: </strong> ${prescription?.phar?.name}</n>
+        </p>`,
+    });
+    //
+    res.status(200).json({
+      success: true,
+      data: prescription,
+      message: "Prescription has been refunded successfuly."
+    });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
 export {
   //
   createPrescription,
@@ -587,5 +633,6 @@ export {
   reqRepeatPrescription,
   findPrescriptions,
   updatePharmacyPrescription,
-  updatePatientPrescriptionPayment
+  updatePatientPrescriptionPayment,
+  updatePatientPrescriptionRefundPayment
 };
