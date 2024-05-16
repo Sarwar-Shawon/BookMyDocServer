@@ -14,3 +14,7 @@ Once you have installed the dependencies, you can run the project with the comma
 
 ## Important Note
 **Now you can run the client from** : /bookmydoc/client
+
+
+
+
