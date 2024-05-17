@@ -330,12 +330,14 @@ const updateHolidays = async (req, res) => {
 //checkDateExistInHolidays
 const checkDateExistInHolidays = (dateRanges, dt) => {
   const dateToCheckMoment = moment(dt, "DD-MM-YYYY");
-  //console.log("dateToCheckMoment::", dateToCheckMoment);
+  // console.log("dateToCheckMoment::", dateToCheckMoment);
   for (const range of dateRanges) {
     const startDate = moment(range.start_date, "DD-MM-YYYY");
     const endDate = moment(range.end_date, "DD-MM-YYYY");
-    //console.log("startDate::", startDate);
-    //console.log("endDate::", endDate);
+    endDate.set({ hour: 23, minute: 59, second: 0, millisecond: 0 });
+
+    // console.log("startDate::", startDate);
+    // console.log("endDate::", endDate);
 
     if (dateToCheckMoment.isBetween(startDate, endDate, null, "[]")) {
       return true;

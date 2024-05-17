@@ -379,6 +379,10 @@ const sendOTP = async (obj) => {
       length: 6,
       charset: "numeric",
     });
+    const findOtp = await Otps.findOne({email: obj.email});
+    if(findOtp){
+      await findOtp.deleteOne()
+    }
     const newOTP = new Otps({ email: obj.email, otp, ct: Date.now() });
     //save otp to database
     await newOTP.save();
