@@ -9,6 +9,7 @@ import Users from "../models/users.js"
 async function mongooseConnection() {
   try {
     await mongoose.connect(db.url,{});
+    console.log("database connected");
     /* this code is written to create an admin so that 
     whoever wants to test this app can use the dummy credential
     when they setup mongodb locally.*/
@@ -25,9 +26,9 @@ async function mongooseConnection() {
           isVerified: true,
         });
         await dummyUser.save();
-        console.log("Admin user created");
+        //console.log("Admin user created");
       } else {
-        console.log("Admin user already exists");
+        //console.log("Admin user already exists");
       }
       /*The avobe code is for only testing purpose.*/
     }

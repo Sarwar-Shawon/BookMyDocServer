@@ -13,7 +13,7 @@ import moment from "moment";
 const createPrescription = async (req, res) => {
   try {
     //
-    console.log("req.body:::", req.body);
+    //console.log("req.body:::", req.body);
     const doctor = req.doctor;
     const apt = await Appointments.findById(req.body.apt_id).populate("pt", {
       _id: 1,
@@ -37,10 +37,10 @@ const createPrescription = async (req, res) => {
       presType: "New",
       amount : parseFloat(req.body.medications.length * 9.65).toString()
     };
-    console.log("req.bodyreq.bodyreq.body:::",req.body)
+    //console.log("req.bodyreq.bodyreq.body:::",req.body)
     if (req.body.phr_id) params.phar = req.body.phr_id;
 
-    console.log("params:::", params);
+    //console.log("params:::", params);
     //
     const prescription = new Prescriptions(params);
     await prescription.save();
@@ -64,7 +64,7 @@ const createPrescription = async (req, res) => {
     });
   } catch (err) {
     //return err
-    console.log("err:", err);
+    //console.log("err:", err);
     return res.status(500).json({ success: false, error: err.message });
   }
 };
@@ -97,7 +97,7 @@ const createRepeatPrescription = async (req, res) => {
       repeatOption: req.body.repeatOption,
       presType: "Repeated",
     };
-    console.log("params:::", params);
+    //console.log("params:::", params);
     //
     const prescription = new Prescriptions(params);
     await prescription.save();
@@ -124,7 +124,7 @@ const createRepeatPrescription = async (req, res) => {
     });
   } catch (err) {
     //return err
-    console.log("err:", err);
+    //console.log("err:", err);
     return res.status(500).json({ success: false, error: err.message });
   }
 };
@@ -204,8 +204,8 @@ const getDoctorPrescriptions = async (req, res) => {
         : 0;
     const limit = req.query.limit || 10;
     //
-    console.log("startDay", startDay);
-    console.log("endDay", endDay);
+    //console.log("startDay", startDay);
+    //console.log("endDay", endDay);
     const params = {
       doc: doctor._id,
       createdAt: {
@@ -233,7 +233,7 @@ const getDoctorPrescriptions = async (req, res) => {
       .populate("phar", { _id: 1, name: 1, addr: 1, phone: 1 })
       .skip(skip)
       .limit(limit);
-    console.log("prescriptions:::", prescriptions);
+    //console.log("prescriptions:::", prescriptions);
     //
     res.status(200).json({
       success: true,
@@ -266,8 +266,8 @@ const getPatientPrescriptions = async (req, res) => {
         : 0;
     const limit = req.query.limit || 10;
     //
-    // console.log("startDay", startDay);
-    // console.log("endDay", endDay);
+    // //console.log("startDay", startDay);
+    // //console.log("endDay", endDay);
     //
     const query = {
       pt: patient._id,
@@ -300,7 +300,7 @@ const getPatientPrescriptions = async (req, res) => {
       .populate("phar", { _id: 1, name: 1, addr: 1, phone: 1 , img: 1 })
       .skip(skip)
       .limit(limit);
-    console.log("prescriptions:::", prescriptions);
+    //console.log("prescriptions:::", prescriptions);
     //
     res.status(200).json({
       success: true,
@@ -349,8 +349,8 @@ const getPharmacyPrescriptions = async (req, res) => {
         : 0;
     const limit = req.query.limit || 10;
     //
-    console.log("startDay", startDay);
-    console.log("endDay", endDay);
+    //console.log("startDay", startDay);
+    //console.log("endDay", endDay);
     const query = {
       phar: pharmacy._id,
       createdAt: {
@@ -378,7 +378,7 @@ const getPharmacyPrescriptions = async (req, res) => {
       .populate("phar", { _id: 1, name: 1, addr: 1, phone: 1 })
       .skip(skip)
       .limit(limit);
-    console.log("prescriptions:::", prescriptions);
+    //console.log("prescriptions:::", prescriptions);
     //
     res.status(200).json({
       success: true,
@@ -465,7 +465,7 @@ const getMedicineSuggestions = async (req, res) => {
     const medicines = await Medicines.find({
       genericName: { $regex: req.query.search_text, $options: "i" },
     });
-    console.log("medicines::", medicines);
+    //console.log("medicines::", medicines);
     //
     res.status(200).json({
       success: true,
@@ -518,7 +518,7 @@ const findPrescriptions = async (req, res) => {
       })
       .populate("phar", { _id: 1, name: 1, addr: 1, phone: 1 });
 
-    console.log("prescriptions:::", prescriptions);
+    //console.log("prescriptions:::", prescriptions);
     //
     res.status(200).json({
       success: true,
@@ -532,7 +532,7 @@ const findPrescriptions = async (req, res) => {
 //
 const updatePatientPrescriptionPayment = async (req, res) => {
   try {
-    console.log("req.transObj", req.transObj)
+    //console.log("req.transObj", req.transObj)
     //
     const prescription = await Prescriptions.findById(req.transObj.pres_id).populate({
       path: "pt",
@@ -541,7 +541,7 @@ const updatePatientPrescriptionPayment = async (req, res) => {
       path: "phar",
       select: "phar_email",
     });;
-    console.log("prescriptions:::", prescription)
+    //console.log("prescriptions:::", prescription)
     //
     if (!prescription) {
       return res
@@ -587,7 +587,7 @@ const updatePatientPrescriptionRefundPayment = async (req, res) => {
       path: "phar",
       select: "phar_email name",
     });;
-    console.log("prescriptions:::", prescription)
+    //console.log("prescriptions:::", prescription)
     //
     if (!prescription) {
       return res

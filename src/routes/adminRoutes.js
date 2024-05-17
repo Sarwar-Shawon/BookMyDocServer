@@ -18,6 +18,8 @@ import {
   updadtePharmacy,
   deletePharmacy,
   getAllPharmacies,
+  //
+  getAdminDashboard
 } from "../controllers/adminController.js";
 import {
   createOrganization,
@@ -168,5 +170,9 @@ adminRouter
 adminRouter
   .route("/get-profile")
   .get(auth, checkAuthRole([roles.Admin]), getProfile);
+  //
+adminRouter
+  .route("/admin-dashboard")
+  .get(auth, checkAuthRole([roles.Admin]), getAdminDashboard);
 //
 export default adminRouter;

@@ -72,7 +72,7 @@ const createAppointment = async (req, res) => {
       ].join(""),
       notes: req.body.notes,
     };
-    console.log("params:::", params);
+    //console.log("params:::", params);
     //
     const appointment = new Appointments(params);
     const saveApt = await appointment.save();
@@ -104,7 +104,7 @@ const createAppointment = async (req, res) => {
     });
   } catch (err) {
     //return err
-    console.log("err:", err);
+    //console.log("err:", err);
     if (err.code == "11000") {
       return res.status(500).json({
         success: false,
@@ -129,7 +129,7 @@ const acceptAppointment = async (req, res) => {
     const apt = await Appointments.findOne({ _id: req.body.apt_id })
       .populate("doc", { _id: 1, f_name: 1, l_name: 1, doc_email: 1 })
       .populate("pt", { _id: 1, f_name: 1, l_name: 1, pt_email: 1, dob: 1 });
-    console.log("aptapt", apt);
+    //console.log("aptapt", apt);
     if (!apt) {
       return res
         .status(422)
@@ -247,7 +247,7 @@ const updateAppointment = async (req, res) => {
         nhs: 1,
         dob: 1,
       });
-    console.log("aptapt", apt);
+    //console.log("aptapt", apt);
     if (!apt) {
       return res
         .status(422)
@@ -331,7 +331,7 @@ const getDoctorAppointments = async (req, res) => {
       })
       .skip(skip)
       .limit(limit);
-    console.log("appointmentsappointments:::", appointments);
+    //console.log("appointmentsappointments:::", appointments);
     //
     // appointments.map((item)=>{
     //   if(item.pt.medical_history)
@@ -400,7 +400,7 @@ const getAppointmentsHistory = async (req, res) => {
     )
       params.doc = user._id;
     // if (req.query.status) params.status = req.query.status;
-    console.log("params", params);
+    //console.log("params", params);
     const appointments = await Appointments.find(params)
       .populate("dept", { _id: 1, name: 1 })
       .populate("org")
@@ -442,7 +442,7 @@ const getPatientAppointments = async (req, res) => {
         ? Number(req.query.skip)
         : 0;
     const limit = req.query.limit || 10;
-    console.log("startDaystartDaystartDaystartDay:", startDay);
+    //console.log("startDaystartDaystartDaystartDay:", startDay);
 
     const appointments = await Appointments.find({
       pt: patient._id,
@@ -465,7 +465,7 @@ const getPatientAppointments = async (req, res) => {
       })
       .skip(skip)
       .limit(limit);
-    // console.log("appointmentsappointments:::", appointments);
+    // //console.log("appointmentsappointments:::", appointments);
     //
     res.status(200).json({
       success: true,

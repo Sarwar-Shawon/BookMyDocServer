@@ -22,7 +22,7 @@ const auth = async (req, res, next) => {
     req.user = tokenDetails;
     next();
   } catch (err) {
-    // console.log(err);
+    // //console.log(err);
     res.status(403).json({
       success: false,
       error: "Access Denied: Invalid token",
@@ -38,7 +38,7 @@ const checkAuthRole = (UserRoles) => async (req, res, next) => {
     const user = jwt.decode(
       token
     );
-    // console.log("useruseruseruser:::", user);
+    // //console.log("useruseruseruser:::", user);
     //
     let { roles } = user;
     if (!roles) throw "Access Denied: Invalid user";
@@ -49,7 +49,7 @@ const checkAuthRole = (UserRoles) => async (req, res, next) => {
         })
       : next();
   } catch (err) {
-    // console.log(err);
+    // //console.log(err);
     res.status(403).json({
       success: false,
       error: "Access Denied: Invalid user",

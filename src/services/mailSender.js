@@ -28,7 +28,7 @@ const mailSender = async (obj) => {
     });
 
   } catch (error) {
-    console.log("src/services/mailSender.js: err: ", error.message);
+    //console.log("src/services/mailSender.js: err: ", error.message);
     throw error;
     
   }

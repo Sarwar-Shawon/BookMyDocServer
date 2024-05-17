@@ -33,7 +33,7 @@ const createDepartment = async (req, res) => {
     });
   } catch (err) {
     //return err
-    console.log("errerrerr::", err);
+    //console.log("errerrerr::", err);
     if (err.code == "11000") {
       res.status(500).json({
         success: false,

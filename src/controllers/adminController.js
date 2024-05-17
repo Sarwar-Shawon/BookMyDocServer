@@ -9,7 +9,8 @@ import Users from "../models/users.js";
 import roles from "../helpers/roles.js";
 import mailSender from "../services/mailSender.js";
 import { hashPassword } from "../utils/encryptPassword.js";
-import mongoose from "mongoose";
+import Organizations from "../models/organization.js";
+import Departments from "../models/departments.js";
 //
 const registerToSystem = async (obj) => {
   try {
@@ -51,16 +52,15 @@ const registerToSystem = async (obj) => {
 //
 const deleteUsers = async (obj) => {
   try {
-    const user = await Users.findOne({email: obj.email});
-    console.log("user",user)
-    console.log("user",obj)
+    const user = await Users.findOne({ email: obj.email });
+    //console.log("user", user);
+    //console.log("user", obj);
     if (!user) {
-      throw "No user found"
+      throw "No user found";
     }
     await user.deleteOne();
-
   } catch (err) {
-    throw err
+    throw err;
   }
 };
 /*
@@ -113,7 +113,7 @@ const registerNewDoctror = async (req, res) => {
       throw { message: saveUser.error };
     }
   } catch (err) {
-    console.log("registerNewDoctror::: err", err);
+    //console.log("registerNewDoctror::: err", err);
     //return err
     if (err.code == 11000) {
       res.status(500).json({
@@ -149,8 +149,7 @@ const updadteDoctor = async (req, res) => {
     doctor.gmc_licence = req.body.gmc_licence;
     // doctor.addr = req.body.addr;
     doctor.active = req.body.active;
-    doctor.gender= req.body.gender,
-    doctor.img = imgUrl;
+    (doctor.gender = req.body.gender), (doctor.img = imgUrl);
     doctor.dept = req.body.dept;
     doctor.organization = req.body.organization;
     doctor.nurses = req.body.nurses;
@@ -182,10 +181,10 @@ const getAllDoctors = async (req, res) => {
     const limit = req.query.limit || 15;
     const query = {};
     if (req.query.dept) {
-      query['dept'] = req.query.dept
+      query["dept"] = req.query.dept;
     }
-    if (req.query.org){
-      query['organization'] = req.query.org
+    if (req.query.org) {
+      query["organization"] = req.query.org;
     }
     const doctors = await Doctors.find(query)
       .populate("dept", { _id: 1, name: 1 })
@@ -205,7 +204,7 @@ const getAllDoctors = async (req, res) => {
 // delete doctor
 const deleteDoctor = async (req, res) => {
   try {
-    console.log('req.body',req.body)
+    //console.log("req.body", req.body);
     let doctor = await Doctors.findById(req.body._id);
     if (!doctor) {
       return res.status(400).json({
@@ -215,7 +214,7 @@ const deleteDoctor = async (req, res) => {
     }
     const deletePromises = [
       deleteUsers({ email: doctor.doc_email }),
-      doctor.deleteOne()
+      doctor.deleteOne(),
     ];
     await Promise.all(deletePromises);
     //
@@ -280,7 +279,7 @@ const registerNewNurse = async (req, res) => {
       throw { message: saveUser.error };
     }
   } catch (err) {
-    console.log("registerNewNurse::: err", err);
+    //console.log("registerNewNurse::: err", err);
     //return err
     if (err.code == 11000) {
       res.status(500).json({
@@ -315,8 +314,7 @@ const updadteNurse = async (req, res) => {
     nurse.nhs_id = req.body.nhs_id;
     // nurse.addr = req.body.addr;
     nurse.dept = req.body.dept;
-    nurse.gender= req.body.gender,
-    nurse.active = req.body.active;
+    (nurse.gender = req.body.gender), (nurse.active = req.body.active);
     nurse.organization = req.body.organization;
     nurse.img = imgUrl;
     //save to db
@@ -348,10 +346,10 @@ const getAllNurses = async (req, res) => {
     const limit = req.query.limit || 15;
     const query = {};
     if (req.query.dept) {
-      query['dept'] = req.query.dept
+      query["dept"] = req.query.dept;
     }
-    if (req.query.org){
-      query['organization'] = req.query.org
+    if (req.query.org) {
+      query["organization"] = req.query.org;
     }
     const nurses = await Nurses.find(query)
       .populate("dept", { _id: 1, name: 1 })
@@ -403,7 +401,7 @@ const deleteNurse = async (req, res) => {
     }
     const deletePromises = [
       deleteUsers({ email: nurse.nur_email }),
-      nurse.deleteOne()
+      nurse.deleteOne(),
     ];
     await Promise.all(deletePromises);
     //
@@ -461,7 +459,7 @@ const registerNewPharmacy = async (req, res) => {
       throw { message: saveUser.error };
     }
   } catch (err) {
-    console.log("registerNewPharmacy:: err", err);
+    //console.log("registerNewPharmacy:: err", err);
     //return err
     if (err.code == 11000) {
       res.status(500).json({
@@ -522,8 +520,8 @@ const getAllPharmacies = async (req, res) => {
         : 0;
     const limit = req.query.limit || 15;
     const query = {};
-    if (req.query.org){
-      query['org'] = req.query.org
+    if (req.query.org) {
+      query["org"] = req.query.org;
     }
     const pharmacies = await Pharmacies.find(query)
       .populate("org", { _id: 1, name: 1 })
@@ -551,7 +549,7 @@ const deletePharmacy = async (req, res) => {
     }
     const deletePromises = [
       deleteUsers({ email: pharmacy.phar_email }),
-      pharmacy.deleteOne()
+      pharmacy.deleteOne(),
     ];
     await Promise.all(deletePromises);
     //
@@ -559,6 +557,40 @@ const deletePharmacy = async (req, res) => {
       success: true,
       message: "You've successfully deleted the pharmacy.",
       data: req.body._id,
+    });
+  } catch (err) {
+    //return err
+    return res.status(500).json({ success: false, error: err.message });
+  }
+};
+//
+const getAdminDashboard = async (req, res) => {
+  try {
+    const [
+      organizationsCount,
+      departmentsCount,
+      doctorsCount,
+      nursesCount,
+      pharmaciesCount,
+    ] = await Promise.all([
+      Organizations.countDocuments(),
+      Departments.countDocuments(),
+      Doctors.countDocuments(),
+      Nurses.countDocuments(),
+      Pharmacies.countDocuments(),
+    ]);
+    //
+    const data = {
+      organizations: organizationsCount,
+      departments: departmentsCount,
+      doctors: doctorsCount,
+      nurses: nursesCount,
+      pharmacies: pharmaciesCount,
+    };
+    //
+    res.status(200).json({
+      success: true,
+      data: data,
     });
   } catch (err) {
     //return err
@@ -583,6 +615,8 @@ export {
   updadtePharmacy,
   deletePharmacy,
   getAllPharmacies,
+  //
+  getAdminDashboard,
 };
 
 // Doctors.find({})

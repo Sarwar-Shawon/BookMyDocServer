@@ -42,7 +42,7 @@ const updatePatientTransactionDetails = async (req, res) => {
     const sessionId = req.body.sessionId;
     const transaction = await stripeInstance.checkout.sessions.retrieve(sessionId);
     //
-    console.log("transactiontransactiontransaction: ", transaction)
+    //console.log("transactiontransactiontransaction: ", transaction)
     //
     if (transaction?.payment_intent) {
       req.transObj = {
@@ -79,7 +79,7 @@ const refundAmount = async (req, res) => {
       payment_intent: req.body.payment_intent,
       amount:  req.body.paid_amount,
     });
-    console.log("refund",refund)
+    //console.log("refund",refund)
     //
     req.refund = refund
     return await updatePatientPrescriptionRefundPayment(req, res);

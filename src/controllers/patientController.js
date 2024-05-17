@@ -74,7 +74,7 @@ const getDoctors = async (req, res) => {
       .skip(skip)
       .limit(limit);
     //
-    console.log("doctorsdoctorsdoctorsdoctorsdoctors:", doctors);
+    //console.log("doctorsdoctorsdoctorsdoctorsdoctors:", doctors);
     res.status(200).json({
       success: true,
       data: doctors,
@@ -82,7 +82,7 @@ const getDoctors = async (req, res) => {
     //
   } catch (err) {
     //return err
-    console.log("err", err);
+    //console.log("err", err);
     return res.status(500).json({ success: false, error: err.message });
   }
 };
@@ -216,8 +216,8 @@ const getAvailableDoctorsByDate = async (req, res) => {
       startDay.setUTCHours(0, 0, 0, 0);
       const endDay = new Date(req.query.date);
       endDay.setUTCHours(23, 59, 59, 999);
-      // console.log("startDay",startDay)
-      // console.log("endDay",endDay)
+      // //console.log("startDay",startDay)
+      // //console.log("endDay",endDay)
       const existingAppointments = await Appointments.find({
         doc: doctor._id,
         apt_date: {
@@ -266,7 +266,7 @@ const updatePatientHealthRecord = async (req, res) => {
     }
     //
     const patient = await Patients.findById(req.body.pt_id);
-    console.log("patient", patient);
+    //console.log("patient", patient);
     patient.medical_history = req.body.medical_history;
     // patient.medical_history = encryptData(JSON.stringify(req.body.medical_history));
 
