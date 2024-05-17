@@ -39,6 +39,38 @@ const createAppointment = async (req, res) => {
         error: "You have already booked an appointment at the same time.",
       });
     }
+     //
+     const currentDate = new Date();
+     const startDay = new Date(
+       currentDate.getFullYear(),
+       currentDate.getMonth(),
+       1
+     );
+     startDay.setUTCHours(0, 0, 0, 0);
+     const endDay = new Date(
+       currentDate.getFullYear(),
+       currentDate.getMonth() + 1,
+       1
+     );
+     //
+     console.log("startDay", startDay);
+     console.log("endDay", endDay);
+     //
+     const apt_cnt = await Appointments.countDocuments({
+       pt: patient._id,
+       createdAt: {
+         $gte: startDay,
+         $lte: endDay,
+       },
+     });
+     console.log("apt_cntapt_cntapt_cnt:", apt_cnt)
+     if(apt_cnt >= process.env.MAX_APNT_PER_MONTH){
+      return res.status(422).json({
+        success: false,
+        error: `You have already reached your limit. You are not allowed to book appointment more than ${process.env.MAX_APNT_PER_MONTH} per month`,
+      });
+     }
+    //
     // const date1 = new Date(new Date(req.body.apt_date).setHours(0, 0, 0, 0));
     // const date2 = new Date(new Date().setHours(0, 0, 0, 0));
     // const currentTime = new Date();
