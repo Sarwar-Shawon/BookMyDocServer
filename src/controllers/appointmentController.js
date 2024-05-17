@@ -242,7 +242,7 @@ const updateAppointment = async (req, res) => {
         _id: 1,
         f_name: 1,
         l_name: 1,
-        doc_email: 1,
+        pt_email: 1,
         img: 1,
         nhs: 1,
         dob: 1,

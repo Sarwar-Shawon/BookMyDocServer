@@ -423,7 +423,6 @@ const reqRepeatPrescription = async (req, res) => {
     //       <strong> Url:</strong> ${process.env.CLIENT_APP_URL}/prescriptions</n>
     //     </p>`,
     // });
-
     // Email body for the doctor
     const doctorEmailBody = `<p>A patient, ${patient.f_name} ${patient.l_name}, has requested for a repeat prescription.</br>
                             <strong>Old Prescription Id:</strong> ${pres._id}</br>

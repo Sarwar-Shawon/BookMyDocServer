@@ -12,6 +12,9 @@ const createOrganization = async (req, res) => {
     if (req.file?.filename) {
       imgUrl = req.file.filename;
     }
+    if(req.body?.addr){
+      req.body.addr.lat_lng = req.body.addr.lat_lng.map(Number);
+    }
     const organization = new Organizations({
       name: req.body.name,
       phone: req.body.phone,
@@ -63,7 +66,10 @@ const updadteOrganization = async (req, res) => {
     organization.phone = req.body.phone;
     organization.img = imgUrl;
     organization.active = req.body.active;
-    organization.addr = req.body.addr;
+    if(req.body?.addr){
+      req.body.addr.lat_lng = req.body.addr.lat_lng.map(Number);
+      organization.addr = req.body.addr;
+    }
     //save to db
     await organization.save();
     //return response
